@@ -10,15 +10,13 @@ export class IntegrationController {
   @UsePipes(new ValidationPipe({ transform: true }))
   @Post()
   async apiCommand(@Body() event: ApiEvent) {
-    console.log('handleSyncEvent()');
     return this.integrationService.handleSync(event);
   }
 
-  // TODO(gb): use ExceptionFilter
+  // TODO(gb): @Use(ExceptionFilter())
   @UsePipes(new ValidationPipe({ transform: true }))
   @EventPattern('events')
   async apiEvent(@Payload() msg: ApiEvent, @Ctx() context: MqttContext) {
-    console.log('handleAsyncEvent()');
     await this.integrationService.handleAsync(msg);
   }
 }
