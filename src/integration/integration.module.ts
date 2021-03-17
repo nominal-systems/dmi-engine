@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { IntegrationController } from './integration.controller';
-import { IntegrationService } from './integration.service';
-import { ZoetisController } from './zoetis.controller';
+import { ZoetisController } from './providers/zoetis.controller';
+import { ProviderService } from './provider.service';
 
 @Module({
-  controllers: [IntegrationController, ZoetisController],
-  providers: [IntegrationService],
+  controllers: [ZoetisController],
+  providers: [ProviderService],
 })
 export class IntegrationModule {}
