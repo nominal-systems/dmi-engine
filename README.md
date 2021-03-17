@@ -127,8 +127,233 @@ Event types are specified in a hierarchical manner, according to the following h
 - Provider ID
   - Resource
     - Operation
-    
+
 The following are valid examples of event types:
 - zoetis-v1.orders.create
 - zoetis-v1.orders.cancel
+- zoetis-v1.orders.search
+- zoetis-v1.orders.get
+- zoetis-v1.orders.results
 - zoetis-v1.orders.tests.cancel
+- zoetis-v1.orders.tests.add
+- zoetis-v1.services.list
+- zoetis-v1.genders.list
+- zoetis-v1.species.list
+- zoetis-v1.breeds.list
+
+## Interface between the Integration Engine and the Provider Service
+
+The provider service will receive a JSON object with the following structure (very similar to the events schema):
+
+### Create order
+```json
+{
+  "resource": "orders",
+  "operation": "create",
+  "data": {
+    "providerConfiguration": {
+      "url": "https://qa.vetscanconnect.zoetis.com",
+      "partnerId": "partner-id",
+      "partnerToken": "TOKEN"
+    },
+    "integrationOptions": {
+      "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
+    },
+    "payload": {
+      "id": "659242ae-39ae-4b80-a543-3ab7a1ba2c41",
+      "patient": {
+        "id": "659242ae-39ae-4b80-a543-3ab7a1ba2c41",
+        "lastName": "Snow",
+        "firstname": "John",
+        "species": "CANINE",
+        "gender": "FEMALE_INTACT",
+        "birthdate": "2020-10-10",
+        "breed": "BOXER",
+        "weight": 10.0,
+        "weightUnits": "KG"
+      },
+      "client": {
+        "id": "c9dc355c-73b5-4258-b0b6-88784bbffc76",
+        "lastName": "Corleone",
+        "firstName": "Michael"
+      },
+      "notes": "Some notes here",
+      "tests": [
+        {
+          "code": "HEM"
+        }
+      ],
+      "veterinarian": {
+        "id": "c9dc355c-73b5-4258-b0b6-88784bbffc76",
+        "lastName": "Böse",
+        "firstName": "Hannah"
+      },
+      "technician": "John Smith",
+      "editable": false
+    }
+  }
+}
+```
+
+### Cancel order
+```json
+{
+  "resource": "orders",
+  "operation": "cancel",
+  "data": {
+    "providerConfiguration": {
+      "url": "https://qa.vetscanconnect.zoetis.com",
+      "partnerId": "partner-id",
+      "partnerToken": "TOKEN"
+    },
+    "integrationOptions": {
+      "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
+    },
+    "payload": {
+      "id": "659242ae-39ae-4b80-a543-3ab7a1ba2c41"
+    }
+  }
+}
+```
+
+### Cancel a test in an order
+```json
+{
+  "resource": "orders",
+  "operation": "tests.cancel",
+  "data": {
+    "providerConfiguration": {
+      "url": "https://qa.vetscanconnect.zoetis.com",
+      "partnerId": "partner-id",
+      "partnerToken": "TOKEN"
+    },
+    "integrationOptions": {
+      "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
+    },
+    "payload": {
+      "id": "659242ae-39ae-4b80-a543-3ab7a1ba2c41",
+      "tests": [
+        {
+          "code": "HEM"
+        }
+      ]
+    }
+  }
+}
+```
+
+### Get a result
+```json
+{
+  "resource": "orders",
+  "operation": "results",
+  "data": {
+    "providerConfiguration": {
+      "url": "https://qa.vetscanconnect.zoetis.com",
+      "partnerId": "partner-id",
+      "partnerToken": "TOKEN"
+    },
+    "integrationOptions": {
+      "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
+    },
+    "payload": {
+      "id": "659242ae-39ae-4b80-a543-3ab7a1ba2c41"
+    }
+  }
+}
+```
+
+### Get directory of services
+```json
+{
+  "resource": "services",
+  "operation": "list",
+  "data": {
+    "providerConfiguration": {
+      "url": "https://qa.vetscanconnect.zoetis.com",
+      "partnerId": "partner-id",
+      "partnerToken": "TOKEN"
+    },
+    "integrationOptions": {
+      "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
+    },
+    "payload": null
+  }
+}
+```
+
+### Get directory of services
+```json
+{
+  "resource": "services",
+  "operation": "list",
+  "data": {
+    "providerConfiguration": {
+      "url": "https://qa.vetscanconnect.zoetis.com",
+      "partnerId": "partner-id",
+      "partnerToken": "TOKEN"
+    },
+    "integrationOptions": {
+      "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
+    },
+    "payload": null
+  }
+}
+```
+
+### Get genders
+```json
+{
+  "resource": "genders",
+  "operation": "list",
+  "data": {
+    "providerConfiguration": {
+      "url": "https://qa.vetscanconnect.zoetis.com",
+      "partnerId": "partner-id",
+      "partnerToken": "TOKEN"
+    },
+    "integrationOptions": {
+      "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
+    },
+    "payload": null
+  }
+}
+```
+
+### Get species
+```json
+{
+  "resource": "species",
+  "operation": "list",
+  "data": {
+    "providerConfiguration": {
+      "url": "https://qa.vetscanconnect.zoetis.com",
+      "partnerId": "partner-id",
+      "partnerToken": "TOKEN"
+    },
+    "integrationOptions": {
+      "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
+    },
+    "payload": null
+  }
+}
+```
+
+### Get breeds
+```json
+{
+  "resource": "breeds",
+  "operation": "list",
+  "data": {
+    "providerConfiguration": {
+      "url": "https://qa.vetscanconnect.zoetis.com",
+      "partnerId": "partner-id",
+      "partnerToken": "TOKEN"
+    },
+    "integrationOptions": {
+      "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
+    },
+    "payload": null
+  }
+}
+```
