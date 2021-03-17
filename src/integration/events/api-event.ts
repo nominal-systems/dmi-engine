@@ -11,5 +11,11 @@ export class ApiEvent {
   type: string;
 
   @IsNotEmpty()
-  data: any;
+  data: ApiEventData;
+}
+
+export interface ApiEventData {
+  providerConfiguration?: any;
+  integrationOptions?: any;
+  payload?: any;
 }

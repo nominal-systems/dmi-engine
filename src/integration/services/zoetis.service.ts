@@ -33,7 +33,7 @@ export class ZoetisProviderService
   cancelOrder(data: Zoetis): Promise<void> {
     throw new Error('Method not implemented.');
   }
-  cancelOrderTest(data: Zoetis, tests: Test[]): Promise<void> {
+  cancelOrderTest(data: Zoetis): Promise<void> {
     throw new Error('Method not implemented.');
   }
   getServices(data: Zoetis): Promise<Service[]> {
