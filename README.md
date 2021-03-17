@@ -86,7 +86,7 @@ For example, the event object generated to create an Order for Zoetis could look
       "clientId": "f1cc5ab3-c563-47be-86f8-837e14a2228f"
     },
     "payload": {
-      "integrationId": "<yourIntegrationId>",
+      "id": "659242ae-39ae-4b80-a543-3ab7a1ba2c41",
       "patient": {
         "id": "659242ae-39ae-4b80-a543-3ab7a1ba2c41",
         "lastName": "Snow",
