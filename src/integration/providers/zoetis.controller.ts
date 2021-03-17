@@ -12,11 +12,11 @@ import {
   MqttContext,
   Payload,
 } from '@nestjs/microservices';
-import { ProviderService } from '../provider.service';
+import { ZoetisProviderService } from '../services/zoetis.service';
 
 @Controller(`integration/${Provider.Zoetis}`)
 export class ZoetisController implements ProviderIntegration {
-  constructor(private readonly providerService: ProviderService) {}
+  constructor(private readonly providerService: ZoetisProviderService) {}
 
   @UsePipes(new ValidationPipe({ transform: true }))
   @MessagePattern(`${Provider.Zoetis}.${Resource.Order}.${Operation.Create}`)
