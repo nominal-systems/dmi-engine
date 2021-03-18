@@ -1,11 +1,8 @@
-import { Injectable, Logger, HttpService } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import {
-  Client,
   CreateOrderPayload,
   IdPayload,
-  OrderTestPayload,
-  Patient,
-  Veterinarian,
+  OrderTestPayload
 } from '../interfaces/payloads';
 import {
   Breed,
@@ -15,16 +12,11 @@ import {
   ProviderService,
   Result,
   Service,
-  Species,
+  Species
 } from '../interfaces/provider-service';
 import { Zoetis } from '../interfaces/zoetis';
 import { XmlService } from '../xml-service';
-import {
-  AnimalDetails,
-  Identification,
-  LabReportRequestWrapper,
-  LabRequests,
-} from './zoetis.interface';
+import { getOrder } from './helpers/zoetis-order.helper';
 
 @Injectable()
 export class ZoetisProviderService
@@ -38,10 +30,6 @@ export class ZoetisProviderService
     payload: CreateOrderPayload,
     metadata: Zoetis,
   ): Promise<Order> {
-    // @TODO Remove trace
-    Logger.debug(payload);
-    Logger.debug(metadata);
-
     const baseUrl = metadata.providerConfiguration.url;
     const url = `${baseUrl}/vetsync/v1/orders`;
     const auth = {
@@ -50,100 +38,24 @@ export class ZoetisProviderService
     };
     const practiceRef = payload.id;
     const clientId = metadata.integrationOptions.clientId;
+    const order = getOrder(practiceRef, clientId, payload);
+    const xml = this.xmlService.convertObjectToXml(order);
 
-    const getName = (client: Client | Patient | Veterinarian): string => {
-      const { lastName, firstName } = client;
-      let name = lastName;
-      if (firstName) name += ', ' + firstName;
-      return name;
-    };
-
-    function getIdentification(payload: CreateOrderPayload): Identification {
-      return {
-        ReportType: 'Request',
-        PracticeID: 'Practice1',
-        ClientId: clientId,
-        PracticeRef: practiceRef,
-        LaboratoryRef: '1',
-        OwnerName: getName(payload.client),
-        OwnerID: payload.client.id,
-        VetName: getName(payload.veterinarian),
-        VetID: payload.veterinarian.id,
-      };
-    }
-
-    function getAnimalDetails(payload: CreateOrderPayload): AnimalDetails {
-      const patient = payload.patient;
-      return {
-        AnimalID: patient.id,
-        AnimalName: getName(patient),
-        Species: getSpeciesMapping(patient.species),
-        Breed: getBreedMapping(patient.breed),
-        Gender: getGenderMapping(patient.gender),
-        DateOfBirth: patient.birthdate,
-      };
-    }
-
-    function getLabRequests(payload: CreateOrderPayload): LabRequests {
-      return {
-        LabRequest: [
-          {
-            TestCode: 'HEM',
-          },
-        ],
-      };
-      // return {
-      //   LabRequest: payload.tests.map((test) => {
-      //     return {
-      //       TestCode: test.code,
-      //     };
-      //   }),
-      // };
-    }
-
-    function getSpeciesMapping(species: string) {
-      return species;
-    }
-
-    function getBreedMapping(breed: string) {
-      return breed;
-    }
-
-    function getGenderMapping(gender: string) {
-      return gender;
-    }
-
-    const obj: LabReportRequestWrapper = {
-      LabReport: {
-        Identification: getIdentification(payload),
-        AnimalDetails: getAnimalDetails(payload),
-        LabRequests: getLabRequests(payload),
-      },
-    };
-
-    const xml = this.xmlService.convertObjectToXml(obj);
-    console.log(xml);
-
-    const response = await this.httpService
+    await this.httpService
       .post(url, xml, {
         auth,
         headers: {
           'Content-Type': 'application/xml',
         },
       })
-      .toPromise();
+      .toPromise()
 
-    const responseObj = this.xmlService.convertXmlToObject(response.data);
-    console.log(responseObj);
-
-    const order: Order = {
+    return {
       externalId: practiceRef,
       manifestUri: null,
       submissionUri: null,
       status: 'pending',
     };
-
-    return order;
   }
   getBatchOrders(payload: null, metadata: Zoetis): Promise<Order[]> {
     throw new Error('Method not implemented.');
