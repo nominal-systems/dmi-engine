@@ -27,7 +27,9 @@ export enum Operation {
   Cancel = 'cancel',
   TestsCancel = 'tests.cancel',
   Results = 'results',
+  ResultsBatch = 'results.batch',
   List = 'list',
+  Batch = 'batch',
 }
 
 export interface ProviderIntegration {
