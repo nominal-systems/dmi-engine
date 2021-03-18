@@ -1,8 +1,11 @@
 import { Injectable, Logger, HttpService } from '@nestjs/common';
 import {
+  Client,
   CreateOrderPayload,
   IdPayload,
   OrderTestPayload,
+  Patient,
+  Veterinarian,
 } from '../interfaces/payloads';
 import {
   Breed,
@@ -15,18 +18,30 @@ import {
   Species,
 } from '../interfaces/provider-service';
 import { Zoetis } from '../interfaces/zoetis';
+import { XmlService } from '../xml-service';
+import {
+  AnimalDetails,
+  Identification,
+  LabReportRequestWrapper,
+  LabRequests,
+} from './zoetis.interface';
 
 @Injectable()
 export class ZoetisProviderService
   implements ProviderService<Zoetis>, PdfResults<Zoetis> {
-  constructor(private httpService: HttpService) {}
+  constructor(
+    private httpService: HttpService,
+    private xmlService: XmlService,
+  ) {}
 
   async createOrder(
     payload: CreateOrderPayload,
     metadata: Zoetis,
   ): Promise<Order> {
+    // @TODO Remove trace
     Logger.debug(payload);
     Logger.debug(metadata);
+
     const baseUrl = metadata.providerConfiguration.url;
     const url = `${baseUrl}/vetsync/v1/orders`;
     const auth = {
@@ -35,33 +50,80 @@ export class ZoetisProviderService
     };
     const practiceRef = payload.id;
     const clientId = metadata.integrationOptions.clientId;
-    const xml = `<?xml version="1.0" encoding="UTF-8"?>
-    <LabReport>
-        <Identification>
-          <ReportType>Request</ReportType>
-          <PracticeID>Practice1</PracticeID>
-          <ClientId>${clientId}</ClientId>
-          <PracticeRef>${practiceRef}</PracticeRef>
-          <LaboratoryRef>46</LaboratoryRef>
-          <OwnerName>FUSE, Ezyvet</OwnerName>
-          <OwnerID>4</OwnerID>
-          <VetName>Corleone, Michael</VetName>
-          <VetID>provider-1</VetID>
-        </Identification>
-        <AnimalDetails>
-          <AnimalID>100004</AnimalID>
-          <AnimalName>Rover</AnimalName>
-          <Species>DOG</Species>
-          <Breed>Labrador</Breed>
-          <Gender>Male</Gender>
-          <DateOfBirth>2013-08-03</DateOfBirth>
-        </AnimalDetails>
-        <LabRequests>
-          <LabRequest>
-            <TestCode>HEM</TestCode>
-          </LabRequest>
-        </LabRequests>
-    </LabReport>`;
+
+    const getName = (client: Client | Patient | Veterinarian): string => {
+      const { lastName, firstName } = client;
+      let name = lastName;
+      if (firstName) name += ', ' + firstName;
+      return name;
+    };
+
+    function getIdentification(payload: CreateOrderPayload): Identification {
+      return {
+        ReportType: 'Request',
+        PracticeID: 'Practice1',
+        ClientId: clientId,
+        PracticeRef: practiceRef,
+        LaboratoryRef: '1',
+        OwnerName: getName(payload.client),
+        OwnerID: payload.client.id,
+        VetName: getName(payload.veterinarian),
+        VetID: payload.veterinarian.id,
+      };
+    }
+
+    function getAnimalDetails(payload: CreateOrderPayload): AnimalDetails {
+      const patient = payload.patient;
+      return {
+        AnimalID: patient.id,
+        AnimalName: getName(patient),
+        Species: getSpeciesMapping(patient.species),
+        Breed: getBreedMapping(patient.breed),
+        Gender: getGenderMapping(patient.gender),
+        DateOfBirth: patient.birthdate,
+      };
+    }
+
+    function getLabRequests(payload: CreateOrderPayload): LabRequests {
+      return {
+        LabRequest: [
+          {
+            TestCode: 'HEM',
+          },
+        ],
+      };
+      // return {
+      //   LabRequest: payload.tests.map((test) => {
+      //     return {
+      //       TestCode: test.code,
+      //     };
+      //   }),
+      // };
+    }
+
+    function getSpeciesMapping(species: string) {
+      return species;
+    }
+
+    function getBreedMapping(breed: string) {
+      return breed;
+    }
+
+    function getGenderMapping(gender: string) {
+      return gender;
+    }
+
+    const obj: LabReportRequestWrapper = {
+      LabReport: {
+        Identification: getIdentification(payload),
+        AnimalDetails: getAnimalDetails(payload),
+        LabRequests: getLabRequests(payload),
+      },
+    };
+
+    const xml = this.xmlService.convertObjectToXml(obj);
+    console.log(xml);
+
     const response = await this.httpService
       .post(url, xml, {
         auth,
@@ -71,8 +133,8 @@ export class ZoetisProviderService
       })
       .toPromise();
 
-    console.log(response.status);
-    console.log(response.data);
+    const responseObj = this.xmlService.convertXmlToObject(response.data);
+    console.log(responseObj);
 
     const order: Order = {
       externalId: practiceRef,

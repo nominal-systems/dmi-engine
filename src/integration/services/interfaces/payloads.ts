@@ -12,13 +12,19 @@ export type CreateOrderPayload = {
 export type Client = {
   id: string;
   lastName: string;
-  firstName: string;
+  firstName?: string;
+};
+
+export type Veterinarian = {
+  id: string;
+  lastName: string;
+  firstName?: string;
 };
 
 export type Patient = {
   id: string;
   lastName: string;
-  firstname: string;
+  firstName?: string;
   species: string;
   gender: string;
   birthdate: string;
