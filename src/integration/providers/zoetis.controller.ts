@@ -7,7 +7,7 @@ import {
 } from '../interfaces/provider-integration';
 import { ApiEvent } from '../events/api-event';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { ZoetisProviderService } from '../services/zoetis.service';
+import { ZoetisProviderService } from '../services/zoetis/zoetis.service';
 import {
   Breed,
   Gender,
@@ -25,12 +25,10 @@ export class ZoetisController implements ProviderIntegration {
   @UsePipes(new ValidationPipe({ transform: true }))
   @MessagePattern(`${Provider.Zoetis}.${Resource.Orders}.${Operation.Create}`)
   createOrder(@Payload() msg: ApiEvent): Promise<Order> {
-    const data: Zoetis = {
-      providerConfiguration: msg.data.providerConfiguration,
-      integrationOptions: msg.data.integrationOptions,
-    };
+    const { payload, providerConfiguration, integrationOptions } = msg.data;
+    const metadata: Zoetis = { providerConfiguration, integrationOptions };
     Logger.log(`Sending createOrder() request to '${Provider.Zoetis}'`);
-    return this.providerService.createOrder(data);
+    return this.providerService.createOrder(payload, metadata);
   }
 
   @UsePipes(new ValidationPipe({ transform: true }))

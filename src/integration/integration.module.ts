@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
+import { HttpModule, Module } from '@nestjs/common';
 import { ZoetisController } from './providers/zoetis.controller';
-import { ZoetisProviderService } from './services/zoetis.service';
+import { ZoetisProviderService } from './services/zoetis/zoetis.service';
 
 @Module({
+  imports: [HttpModule],
   controllers: [ZoetisController],
   providers: [ZoetisProviderService],
 })

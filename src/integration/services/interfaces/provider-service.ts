@@ -108,35 +108,35 @@ export interface IPayload<T extends Payload> {
 }
 
 export interface ProviderService<T extends IData> {
-  createOrder(data: T & IPayload<CreateOrderPayload>): Promise<Order>;
-  getBatchOrders(data: T & IPayload<NullPayloadPayload>): Promise<Order[]>;
-  getBatchResults(data: T & IPayload<NullPayloadPayload>): Promise<Result[]>;
-  getOrder(data: T & IPayload<IdPayload>): Promise<Order>;
-  getOrderResult(data: T & IPayload<IdPayload>): Promise<Result>;
-  cancelOrder(data: T & IPayload<IdPayload>): Promise<void>;
-  cancelOrderTest(data: T & IPayload<OrderTestPayload>): Promise<void>;
-  getServices(data: T & IPayload<NullPayloadPayload>): Promise<Service[]>;
-  getGenders(data: T & IPayload<NullPayloadPayload>): Promise<Gender[]>;
-  getSpecies(data: T & IPayload<NullPayloadPayload>): Promise<Species[]>;
-  getBreeds(data: T & IPayload<NullPayloadPayload>): Promise<Breed[]>;
+  createOrder(payload: CreateOrderPayload, metadata: T): Promise<Order>;
+  getBatchOrders(payload: NullPayloadPayload, metadata: T): Promise<Order[]>;
+  getBatchResults(payload: NullPayloadPayload, metadata: T): Promise<Result[]>;
+  getOrder(payload: IdPayload, metadata: T): Promise<Order>;
+  getOrderResult(payload: IdPayload, metadata: T): Promise<Result>;
+  cancelOrder(payload: IdPayload, metadata: T): Promise<void>;
+  cancelOrderTest(payload: OrderTestPayload, metadata: T): Promise<void>;
+  getServices(payload: NullPayloadPayload, metadata: T): Promise<Service[]>;
+  getGenders(payload: NullPayloadPayload, metadata: T): Promise<Gender[]>;
+  getSpecies(payload: NullPayloadPayload, metadata: T): Promise<Species[]>;
+  getBreeds(payload: NullPayloadPayload, metadata: T): Promise<Breed[]>;
 }
 
 export interface PdfResults<T extends IData> {
-  getOrderResultPdf(data: T & IPayload<IdPayload>): Promise<Result>;
+  getOrderResultPdf(payload: IdPayload, metadata: T): Promise<Result>;
 }
 
 export interface OrderEdits<T extends IData> {
-  editOrder(data: T & IPayload<IdPayload>): Promise<Result>;
+  editOrder(payload: IdPayload, metadata: T): Promise<Result>;
 }
 
 export interface Manifest<T extends IData> {
-  getOrderManifest(data: T & IPayload<IdPayload>): Promise<Result>;
+  getOrderManifest(payload: IdPayload, metadata: T): Promise<Result>;
 }
 
 export interface SubmissionUrl<T extends IData> {
-  getOrderSubmissionUrl(data: T & IPayload<IdPayload>): Promise<Result>;
+  getOrderSubmissionUrl(payload: IdPayload, metadata: T): Promise<Result>;
 }
 
 export interface NewTests<T extends IData> {
-  addOrderTest(data: T & IPayload<OrderTestPayload>): Promise<void>;
+  addOrderTest(payload: OrderTestPayload, metadata: T): Promise<void>;
 }
