@@ -6,6 +6,6 @@ import { ZoetisProviderService } from './services/zoetis/zoetis.service';
 @Module({
   imports: [HttpModule],
   controllers: [ZoetisController],
-  providers: [XmlService, ZoetisProviderService],
+  providers: [XmlService, ZoetisProviderService]
 })
 export class IntegrationModule {}

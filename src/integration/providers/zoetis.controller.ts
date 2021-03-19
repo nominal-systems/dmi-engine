@@ -1,10 +1,4 @@
 import { Controller, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
-import {
-  Operation,
-  Provider,
-  ProviderIntegration,
-  Resource,
-} from '../interfaces/provider-integration';
 import { ApiEvent } from '../events/api-event';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ZoetisProviderService } from '../services/zoetis/zoetis.service';
@@ -14,9 +8,15 @@ import {
   Order,
   Result,
   Service,
-  Species,
+  Species
 } from '../services/interfaces/provider-service';
 import { Zoetis } from '../services/interfaces/zoetis';
+import {
+  Operation,
+  Provider,
+  ProviderIntegration,
+  Resource
+} from '../interfaces/provider-integration';
 
 @Controller(`integration/${Provider.Zoetis}`)
 export class ZoetisController implements ProviderIntegration {
@@ -42,7 +42,7 @@ export class ZoetisController implements ProviderIntegration {
 
   @UsePipes(new ValidationPipe({ transform: true }))
   @MessagePattern(
-    `${Provider.Zoetis}.${Resource.Orders}.${Operation.TestsCancel}`,
+    `${Provider.Zoetis}.${Resource.Orders}.${Operation.TestsCancel}`
   )
   cancelOrderTest(@Payload() msg: ApiEvent): Promise<void> {
     const { payload, providerConfiguration, integrationOptions } = msg.data;
@@ -62,7 +62,7 @@ export class ZoetisController implements ProviderIntegration {
 
   @UsePipes(new ValidationPipe({ transform: true }))
   @MessagePattern(
-    `${Provider.Zoetis}.${Resource.Orders}.${Operation.ResultsBatch}`,
+    `${Provider.Zoetis}.${Resource.Orders}.${Operation.ResultsBatch}`
   )
   getBatchResults(@Payload() msg: ApiEvent): Promise<Result[]> {
     const { payload, providerConfiguration, integrationOptions } = msg.data;

@@ -6,11 +6,11 @@ import {
   Order,
   Result,
   Service,
-  Species,
+  Species
 } from '../services/interfaces/provider-service';
 
 export enum Provider {
-  Zoetis = 'zoetis-v1',
+  Zoetis = 'zoetis-v1'
 }
 
 export enum Resource {
@@ -18,7 +18,7 @@ export enum Resource {
   Breeds = 'breeds',
   Genders = 'genders',
   Services = 'services',
-  Species = 'species',
+  Species = 'species'
 }
 
 export enum Operation {
@@ -29,7 +29,7 @@ export enum Operation {
   Results = 'results',
   ResultsBatch = 'results.batch',
   List = 'list',
-  Batch = 'batch',
+  Batch = 'batch'
 }
 
 export interface ProviderIntegration {

@@ -9,11 +9,11 @@ import configuration from './config/configuration';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [configuration],
+      load: [configuration]
     }),
-    IntegrationModule,
+    IntegrationModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule {}
