@@ -1,13 +1,6 @@
 import { ApiEvent } from '../events/api-event';
 import { MqttContext } from '@nestjs/microservices';
-import {
-  Breed,
-  Gender,
-  Order,
-  Result,
-  Service,
-  Species
-} from '../services/interfaces/provider-service';
+import { Breed, Gender, Order, Result, Service, Species } from '../services/interfaces/provider-service';
 
 export enum Provider {
   Zoetis = 'zoetis-v1'
@@ -54,4 +47,8 @@ export interface ProviderIntegration {
   getSpecies(msg: ApiEvent, context?: MqttContext): Promise<Species[]>;
 
   getBreeds(msg: ApiEvent, context?: MqttContext): Promise<Breed[]>;
+
+  fetchResults(jobData: any);
+
+  fetchOrders(jobData: any);
 }

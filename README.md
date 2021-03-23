@@ -21,8 +21,8 @@ $ npm install
 # Development
 $ docker-compose -f docker-compose.dev.yml up -d
 
-# Development (ActiveMQ broker only)
-$ docker-compose -f docker-compose.dev.yml up -d activemq
+# Development (ActiveMQ + Redis only)
+$ docker-compose -f docker-compose.dev.yml up -d activemq redis
 
 # Production
 $ docker-compose up -d
