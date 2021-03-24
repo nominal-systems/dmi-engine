@@ -1,21 +1,21 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator'
 
 export class ApiEvent {
   @IsNotEmpty()
-  id: string;
+  id: string
 
   @IsNotEmpty()
-  version: string;
+  version: string
 
   @IsNotEmpty()
-  type: string;
+  type: string
 
   @IsNotEmpty()
-  data: ApiEventData;
+  data: ApiEventData
 }
 
 export interface ApiEventData {
-  providerConfiguration?: any;
-  integrationOptions?: any;
-  payload?: any;
+  providerConfiguration?: any
+  integrationOptions?: any
+  payload?: any
 }

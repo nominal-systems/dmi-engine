@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { IntegrationModule } from './integration/integration.module';
-import configuration from './config/configuration';
-import { BullModule } from '@nestjs/bull';
+import { Module } from '@nestjs/common'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { IntegrationModule } from './integration/integration.module'
+import configuration from './config/configuration'
+import { BullModule } from '@nestjs/bull'
 
 @Module({
   imports: [
