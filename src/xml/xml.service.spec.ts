@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing'
-import { XmlService } from './xml-service'
+import { XmlService } from './xml.service'
 
 describe('XmlService', () => {
   let provider: XmlService

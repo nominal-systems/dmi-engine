@@ -1,10 +1,12 @@
+import { BullModule } from '@nestjs/bull'
 import { Module } from '@nestjs/common'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { ConfigModule, ConfigService } from '@nestjs/config'
-import { IntegrationModule } from './integration/integration.module'
 import configuration from './config/configuration'
-import { BullModule } from '@nestjs/bull'
+import { DemoModule } from './demo/demo.module'
+import { IdexxModule } from './idexx/idexx.module'
+import { ZoetisModule } from './zoetis/zoetis.module'
 
 @Module({
   imports: [
@@ -22,7 +24,9 @@ import { BullModule } from '@nestjs/bull'
       }),
       inject: [ConfigService]
     }),
-    IntegrationModule
+    DemoModule,
+    ZoetisModule,
+    IdexxModule
   ],
   controllers: [AppController],
   providers: [AppService]

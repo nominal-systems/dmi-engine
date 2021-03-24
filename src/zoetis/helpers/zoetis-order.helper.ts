@@ -3,7 +3,7 @@ import {
   CreateOrderPayload,
   Patient,
   Veterinarian
-} from '../../interfaces/payloads'
+} from '../../common/interfaces/payloads'
 import {
   Identification,
   AnimalDetails,

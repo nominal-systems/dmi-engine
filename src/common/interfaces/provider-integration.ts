@@ -1,5 +1,5 @@
-import { ApiEvent } from '../events/api-event'
 import { MqttContext } from '@nestjs/microservices'
+import { ApiEvent } from '../events/api-event'
 import {
   Breed,
   Gender,
@@ -7,9 +7,10 @@ import {
   Result,
   Service,
   Species
-} from '../services/interfaces/provider-service'
+} from './provider-service'
 
 export enum Provider {
+  Demo = 'demo',
   Zoetis = 'zoetis-v1'
 }
 

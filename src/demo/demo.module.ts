@@ -1,11 +1,13 @@
-import { HttpModule, Module } from '@nestjs/common'
-import { XmlService } from '../xml/xml.service'
 import { BullModule } from '@nestjs/bull'
+import { HttpModule, Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { DemoController } from './demo.controller'
+import { DemoProviderService } from './demo.service'
 
 @Module({
   imports: [
     ConfigService,
+    HttpModule,
     BullModule.registerQueue(
       {
         name: 'results'
@@ -14,11 +16,12 @@ import { ConfigService } from '@nestjs/config'
         name: 'orders'
       }
     ),
-    HttpModule
   ],
-  controllers: [],
+  controllers: [
+    DemoController
+  ],
   providers: [
-    XmlService
+    DemoProviderService
   ]
 })
-export class IntegrationModule {}
+export class DemoModule {}

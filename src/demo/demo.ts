@@ -1,4 +1,4 @@
-import { IData, ProviderConfiguration } from './provider-service'
+import { IData, ProviderConfiguration } from '../common/interfaces/provider-service'
 
 export interface Demo extends IData {
   providerConfiguration: DemoProviderConfiguration

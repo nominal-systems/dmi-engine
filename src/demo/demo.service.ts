@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { Demo } from '../interfaces/demo'
+import { Demo } from './demo'
 import {
   CreateOrderPayload,
   IdPayload,
   OrderTestPayload
-} from '../interfaces/payloads'
+} from '../common/interfaces/payloads'
 import {
   Breed,
   Gender,
@@ -18,10 +18,10 @@ import {
   Service,
   Species,
   SubmissionUrl
-} from '../interfaces/provider-service'
+} from '../common/interfaces/provider-service'
 
 @Injectable()
-export class ZoetisProviderService
+export class DemoProviderService
 implements
     ProviderService<Demo>,
     PdfResults<Demo>,
@@ -30,6 +30,7 @@ implements
     SubmissionUrl<Demo>,
     NewTests<Demo> {
   async createOrder (payload: CreateOrderPayload, metadata: Demo): Promise<Order> {
+    console.log(metadata, payload)
     throw new Error('Method not implemented.')
   }
 

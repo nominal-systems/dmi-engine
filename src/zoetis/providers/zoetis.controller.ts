@@ -6,9 +6,9 @@ import {
   UsePipes,
   ValidationPipe
 } from '@nestjs/common'
-import { ApiEvent } from '../events/api-event'
+import { ApiEvent } from '../../common/events/api-event'
 import { MessagePattern, Payload } from '@nestjs/microservices'
-import { ZoetisProviderService } from '../services/zoetis/zoetis.service'
+import { ZoetisProviderService } from '../zoetis.service'
 import {
   Breed,
   Gender,
@@ -16,14 +16,14 @@ import {
   Result,
   Service,
   Species
-} from '../services/interfaces/provider-service'
-import { Zoetis } from '../services/interfaces/zoetis'
+} from '../../common/interfaces/provider-service'
+import { Zoetis } from '../zoetis'
 import {
   Operation,
   Provider,
   ProviderIntegration,
   Resource
-} from '../interfaces/provider-integration'
+} from '../../common/interfaces/provider-integration'
 import { InjectQueue } from '@nestjs/bull'
 import { Queue } from 'bull'
 import { ConfigService } from '@nestjs/config'
