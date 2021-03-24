@@ -21,3 +21,7 @@ services:
     ports:
       - '8161:8161'
       - '1883:1883'
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'

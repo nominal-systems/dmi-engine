@@ -1,4 +1,11 @@
-import { Controller, Logger, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Logger,
+  Post,
+  UsePipes,
+  ValidationPipe
+} from '@nestjs/common';
 import { ApiEvent } from '../events/api-event';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ZoetisProviderService } from '../services/zoetis/zoetis.service';
@@ -17,10 +24,18 @@ import {
   ProviderIntegration,
   Resource
 } from '../interfaces/provider-integration';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { ConfigService } from '@nestjs/config';
 
 @Controller(`integration/${Provider.Zoetis}`)
 export class ZoetisController implements ProviderIntegration {
-  constructor(private readonly providerService: ZoetisProviderService) {}
+  constructor(
+    private configService: ConfigService,
+    private readonly providerService: ZoetisProviderService,
+    @InjectQueue('results') private readonly resultsQueue: Queue,
+    @InjectQueue('orders') private readonly ordersQueue: Queue
+  ) {}
 
   @UsePipes(new ValidationPipe({ transform: true }))
   @MessagePattern(`${Provider.Zoetis}.${Resource.Orders}.${Operation.Create}`)
@@ -123,5 +138,23 @@ export class ZoetisController implements ProviderIntegration {
     const metadata: Zoetis = { providerConfiguration, integrationOptions };
     Logger.log(`Sending getSpecies() request to '${Provider.Zoetis}'`);
     return this.providerService.getSpecies(payload, metadata);
+  }
+
+  @Post('results')
+  async fetchResults(@Body() jobData: any) {
+    await this.resultsQueue.add(
+      Provider.Zoetis,
+      jobData,
+      this.configService.get('jobs.results')
+    );
+  }
+
+  @Post('orders')
+  async fetchOrders(@Body() jobData: any) {
+    await this.ordersQueue.add(
+      Provider.Zoetis,
+      jobData,
+      this.configService.get('jobs.orders')
+    );
   }
 }
