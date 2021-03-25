@@ -3,7 +3,7 @@ import {
   CreateOrderPayload,
   Patient,
   Veterinarian
-} from '../../common/interfaces/payloads'
+} from '../../../common/interfaces/payloads'
 import {
   LabRequests,
   LabReportRequestWrapper

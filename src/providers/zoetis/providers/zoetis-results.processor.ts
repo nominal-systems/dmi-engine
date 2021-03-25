@@ -2,7 +2,7 @@ import { Process, Processor } from '@nestjs/bull'
 import { Logger } from '@nestjs/common'
 import { Job } from 'bull'
 import { ZoetisProviderService } from '../zoetis.service'
-import { Provider } from '../../common/interfaces/provider-integration'
+import { Provider } from '../../../common/interfaces/provider-integration'
 
 @Processor('results')
 export class ZoetisResultsProcessor {

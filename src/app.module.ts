@@ -4,9 +4,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import configuration from './config/configuration'
-import { DemoModule } from './demo/demo.module'
-import { IdexxModule } from './idexx/idexx.module'
-import { ZoetisModule } from './zoetis/zoetis.module'
+import { DemoModule } from './providers/demo/demo.module'
+import { IdexxModule } from './providers/idexx/idexx.module'
+import { ZoetisModule } from './providers/zoetis/zoetis.module'
 
 @Module({
   imports: [

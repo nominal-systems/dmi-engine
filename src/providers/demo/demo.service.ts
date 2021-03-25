@@ -4,7 +4,7 @@ import {
   CreateOrderPayload,
   IdPayload,
   OrderTestPayload
-} from '../common/interfaces/payloads'
+} from '../../common/interfaces/payloads'
 import {
   Breed,
   Gender,
@@ -18,7 +18,7 @@ import {
   Service,
   Species,
   SubmissionUrl
-} from '../common/interfaces/provider-service'
+} from '../../common/interfaces/provider-service'
 
 @Injectable()
 export class DemoProviderService

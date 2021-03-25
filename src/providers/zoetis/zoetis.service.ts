@@ -3,7 +3,7 @@ import {
   CreateOrderPayload,
   IdPayload,
   OrderTestPayload
-} from '../common/interfaces/payloads'
+} from '../../common/interfaces/payloads'
 import {
   Breed,
   Gender,
@@ -13,10 +13,10 @@ import {
   Result,
   Service,
   Species
-} from '../common/interfaces/provider-service'
+} from '../../common/interfaces/provider-service'
 import { ZoetisMetadata } from './interfaces/metadata.interface'
 import { getOrder } from './helpers/zoetis-order.helper'
-import { XmlService } from '../xml/xml.service'
+import { XmlService } from '../../xml/xml.service'
 
 @Injectable()
 export class ZoetisProviderService

@@ -15,7 +15,7 @@ import { DemoProviderService } from './demo.service'
       {
         name: 'orders'
       }
-    ),
+    )
   ],
   controllers: [
     DemoController
