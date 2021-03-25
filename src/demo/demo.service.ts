@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { Demo } from './demo'
+import { DemoMetadata } from './demo'
 import {
   CreateOrderPayload,
   IdPayload,
@@ -23,74 +23,74 @@ import {
 @Injectable()
 export class DemoProviderService
 implements
-    ProviderService<Demo>,
-    PdfResults<Demo>,
-    OrderEdits<Demo>,
-    Manifest<Demo>,
-    SubmissionUrl<Demo>,
-    NewTests<Demo> {
-  async createOrder (payload: CreateOrderPayload, metadata: Demo): Promise<Order> {
+    ProviderService<DemoMetadata>,
+    PdfResults<DemoMetadata>,
+    OrderEdits<DemoMetadata>,
+    Manifest<DemoMetadata>,
+    SubmissionUrl<DemoMetadata>,
+    NewTests<DemoMetadata> {
+  async createOrder (payload: CreateOrderPayload, metadata: DemoMetadata): Promise<Order> {
     console.log(metadata, payload)
     throw new Error('Method not implemented.')
   }
 
-  async getBatchOrders (payload: null, metadata: Demo): Promise<Order[]> {
+  async getBatchOrders (payload: null, metadata: DemoMetadata): Promise<Order[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getBatchResults (payload: null, metadata: Demo): Promise<Result[]> {
+  async getBatchResults (payload: null, metadata: DemoMetadata): Promise<Result[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getOrder (payload: IdPayload, metadata: Demo): Promise<Order> {
+  async getOrder (payload: IdPayload, metadata: DemoMetadata): Promise<Order> {
     throw new Error('Method not implemented.')
   }
 
-  async getOrderResult (payload: IdPayload, metadata: Demo): Promise<Result> {
+  async getOrderResult (payload: IdPayload, metadata: DemoMetadata): Promise<Result> {
     throw new Error('Method not implemented.')
   }
 
-  async cancelOrder (payload: IdPayload, metadata: Demo): Promise<void> {
+  async cancelOrder (payload: IdPayload, metadata: DemoMetadata): Promise<void> {
     throw new Error('Method not implemented.')
   }
 
-  async cancelOrderTest (payload: OrderTestPayload, metadata: Demo): Promise<void> {
+  async cancelOrderTest (payload: OrderTestPayload, metadata: DemoMetadata): Promise<void> {
     throw new Error('Method not implemented.')
   }
 
-  async getServices (payload: null, metadata: Demo): Promise<Service[]> {
+  async getServices (payload: null, metadata: DemoMetadata): Promise<Service[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getGenders (payload: null, metadata: Demo): Promise<Gender[]> {
+  async getGenders (payload: null, metadata: DemoMetadata): Promise<Gender[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getSpecies (payload: null, metadata: Demo): Promise<Species[]> {
+  async getSpecies (payload: null, metadata: DemoMetadata): Promise<Species[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getBreeds (payload: null, metadata: Demo): Promise<Breed[]> {
+  async getBreeds (payload: null, metadata: DemoMetadata): Promise<Breed[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getOrderResultPdf (payload: IdPayload, metadata: Demo): Promise<Result> {
+  async getOrderResultPdf (payload: IdPayload, metadata: DemoMetadata): Promise<Result> {
     throw new Error('Method not implemented.')
   }
 
-  async editOrder (payload: IdPayload, metadata: Demo): Promise<Result> {
+  async editOrder (payload: IdPayload, metadata: DemoMetadata): Promise<Result> {
     throw new Error('Method not implemented.')
   }
 
-  async getOrderManifest (payload: IdPayload, metadata: Demo): Promise<Result> {
+  async getOrderManifest (payload: IdPayload, metadata: DemoMetadata): Promise<Result> {
     throw new Error('Method not implemented.')
   }
 
-  async getOrderSubmissionUrl (payload: IdPayload, metadata: Demo): Promise<Result> {
+  async getOrderSubmissionUrl (payload: IdPayload, metadata: DemoMetadata): Promise<Result> {
     throw new Error('Method not implemented.')
   }
 
-  async addOrderTest (payload: OrderTestPayload, metadata: Demo): Promise<void> {
+  async addOrderTest (payload: OrderTestPayload, metadata: DemoMetadata): Promise<void> {
     throw new Error('Method not implemented.')
   }
 }

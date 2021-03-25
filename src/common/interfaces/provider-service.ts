@@ -98,7 +98,7 @@ export type Payload =
   | OrderTestPayload
   | NullPayloadPayload
 
-export interface IData {
+export interface IMetadata {
   providerConfiguration: ProviderConfiguration
   integrationOptions: IntegrationOptions
 }
@@ -107,7 +107,7 @@ export interface IPayload<T extends Payload> {
   payload: T
 }
 
-export interface ProviderService<T extends IData> {
+export interface ProviderService<T extends IMetadata> {
   createOrder: (payload: CreateOrderPayload, metadata: T) => Promise<Order>
   getBatchOrders: (payload: NullPayloadPayload, metadata: T) => Promise<Order[]>
   getBatchResults: (payload: NullPayloadPayload, metadata: T) => Promise<Result[]>
@@ -121,22 +121,22 @@ export interface ProviderService<T extends IData> {
   getBreeds: (payload: NullPayloadPayload, metadata: T) => Promise<Breed[]>
 }
 
-export interface PdfResults<T extends IData> {
+export interface PdfResults<T extends IMetadata> {
   getOrderResultPdf: (payload: IdPayload, metadata: T) => Promise<Result>
 }
 
-export interface OrderEdits<T extends IData> {
+export interface OrderEdits<T extends IMetadata> {
   editOrder: (payload: IdPayload, metadata: T) => Promise<Result>
 }
 
-export interface Manifest<T extends IData> {
+export interface Manifest<T extends IMetadata> {
   getOrderManifest: (payload: IdPayload, metadata: T) => Promise<Result>
 }
 
-export interface SubmissionUrl<T extends IData> {
+export interface SubmissionUrl<T extends IMetadata> {
   getOrderSubmissionUrl: (payload: IdPayload, metadata: T) => Promise<Result>
 }
 
-export interface NewTests<T extends IData> {
+export interface NewTests<T extends IMetadata> {
   addOrderTest: (payload: OrderTestPayload, metadata: T) => Promise<void>
 }

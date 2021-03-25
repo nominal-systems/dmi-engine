@@ -14,13 +14,13 @@ import {
   Service,
   Species
 } from '../common/interfaces/provider-service'
-import { Zoetis } from './zoetis'
+import { ZoetisMetadata } from './interfaces/metadata.interface'
 import { getOrder } from './helpers/zoetis-order.helper'
 import { XmlService } from '../xml/xml.service'
 
 @Injectable()
 export class ZoetisProviderService
-implements ProviderService<Zoetis>, PdfResults<Zoetis> {
+implements ProviderService<ZoetisMetadata>, PdfResults<ZoetisMetadata> {
   constructor (
     private readonly httpService: HttpService,
     private readonly xmlService: XmlService
@@ -28,7 +28,7 @@ implements ProviderService<Zoetis>, PdfResults<Zoetis> {
 
   async createOrder (
     payload: CreateOrderPayload,
-    metadata: Zoetis
+    metadata: ZoetisMetadata
   ): Promise<Order> {
     const baseUrl = metadata.providerConfiguration.url
     const url = `${baseUrl}/vetsync/v1/orders`
@@ -58,47 +58,47 @@ implements ProviderService<Zoetis>, PdfResults<Zoetis> {
     }
   }
 
-  async getBatchOrders (payload: null, metadata: Zoetis): Promise<Order[]> {
+  async getBatchOrders (payload: null, metadata: ZoetisMetadata): Promise<Order[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getBatchResults (payload: null, metadata: Zoetis): Promise<Result[]> {
+  async getBatchResults (payload: null, metadata: ZoetisMetadata): Promise<Result[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getOrder (payload: IdPayload, metadata: Zoetis): Promise<Order> {
+  async getOrder (payload: IdPayload, metadata: ZoetisMetadata): Promise<Order> {
     throw new Error('Method not implemented.')
   }
 
-  async getOrderResult (payload: IdPayload, metadata: Zoetis): Promise<Result> {
+  async getOrderResult (payload: IdPayload, metadata: ZoetisMetadata): Promise<Result> {
     throw new Error('Method not implemented.')
   }
 
-  async cancelOrder (payload: IdPayload, metadata: Zoetis): Promise<void> {
+  async cancelOrder (payload: IdPayload, metadata: ZoetisMetadata): Promise<void> {
     throw new Error('Method not implemented.')
   }
 
-  async cancelOrderTest (payload: OrderTestPayload, metadata: Zoetis): Promise<void> {
+  async cancelOrderTest (payload: OrderTestPayload, metadata: ZoetisMetadata): Promise<void> {
     throw new Error('Method not implemented.')
   }
 
-  async getServices (payload: null, metadata: Zoetis): Promise<Service[]> {
+  async getServices (payload: null, metadata: ZoetisMetadata): Promise<Service[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getGenders (payload: null, metadata: Zoetis): Promise<Gender[]> {
+  async getGenders (payload: null, metadata: ZoetisMetadata): Promise<Gender[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getSpecies (payload: null, metadata: Zoetis): Promise<Species[]> {
+  async getSpecies (payload: null, metadata: ZoetisMetadata): Promise<Species[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getBreeds (payload: null, metadata: Zoetis): Promise<Breed[]> {
+  async getBreeds (payload: null, metadata: ZoetisMetadata): Promise<Breed[]> {
     throw new Error('Method not implemented.')
   }
 
-  async getOrderResultPdf (payload: IdPayload, metadata: Zoetis): Promise<Result> {
+  async getOrderResultPdf (payload: IdPayload, metadata: ZoetisMetadata): Promise<Result> {
     throw new Error('Method not implemented.')
   }
 }

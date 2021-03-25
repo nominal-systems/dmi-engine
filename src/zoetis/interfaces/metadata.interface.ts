@@ -1,6 +1,6 @@
-import { IData, ProviderConfiguration } from '../common/interfaces/provider-service'
+import { IMetadata, ProviderConfiguration } from '../../common/interfaces/provider-service'
 
-export interface Zoetis extends IData {
+export interface ZoetisMetadata extends IMetadata {
   providerConfiguration: ZoetisProviderConfiguration
   integrationOptions: ZoetisIntegrationOptions
 }

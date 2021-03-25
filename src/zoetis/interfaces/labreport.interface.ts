@@ -1,3 +1,6 @@
+import { AnimalDetails } from './animal-details.interface'
+import { Identification } from './identification.interface'
+
 export interface LabReportWrapper {
   LabReport: LabReportRequests | LabReportResults
 }
@@ -23,28 +26,6 @@ export interface LabReportResults extends LabReport {
   LabResults: LabResults
 }
 
-export interface AnimalDetails {
-  AnimalID: string
-  AnimalName: string
-  Species: string
-  Breed: string
-  Gender: string
-  DateOfBirth: string
-}
-
-export interface Identification {
-  ReportType: string
-  PracticeID: string
-  ClientId?: string
-  PracticeRef: string
-  LaboratoryRef: string
-  OwnerName: string
-  OwnerID: string
-  VetID: string
-  VetName: string
-  ReportNotes?: string
-}
-
 // Wrapper
 export interface LabRequests {
   LabRequest: LabRequest[]
@@ -53,7 +34,6 @@ export interface LabRequests {
 export interface LabRequest {
   TestCode: string
   DeviceID?: string
-  RequestStatus?: 'request' | 'cancel' | 'reassign'
   RequestNotes?: string
 }
 
@@ -91,9 +71,3 @@ export interface LabResultItem {
   HighRange?: string
   ResultText?: string
 }
-
-export type AcknowledgeOrderStatus =
-  | 'request'
-  | 'cancel'
-  | 'reassign'
-  | 'rejected'

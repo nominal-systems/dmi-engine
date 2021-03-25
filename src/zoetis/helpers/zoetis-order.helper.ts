@@ -5,11 +5,11 @@ import {
   Veterinarian
 } from '../../common/interfaces/payloads'
 import {
-  Identification,
-  AnimalDetails,
   LabRequests,
   LabReportRequestWrapper
-} from '../zoetis.interface'
+} from '../interfaces/labreport.interface'
+import { Identification } from '../interfaces/identification.interface'
+import { AnimalDetails } from '../interfaces/animal-details.interface'
 
 export function getOrder (
   id: string,

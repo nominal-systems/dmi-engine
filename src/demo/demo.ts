@@ -1,6 +1,6 @@
-import { IData, ProviderConfiguration } from '../common/interfaces/provider-service'
+import { IMetadata, ProviderConfiguration } from '../common/interfaces/provider-service'
 
-export interface Demo extends IData {
+export interface DemoMetadata extends IMetadata {
   providerConfiguration: DemoProviderConfiguration
   integrationOptions: DemoIntegrationOptions
 }
