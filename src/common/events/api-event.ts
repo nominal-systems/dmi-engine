@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator'
 
-export class ApiEvent {
+export class ApiEvent<EventData = ApiEventData> {
   @IsNotEmpty()
   id: string
 
@@ -11,7 +11,7 @@ export class ApiEvent {
   type: string
 
   @IsNotEmpty()
-  data: ApiEventData
+  data: EventData
 }
 
 export interface ApiEventData {

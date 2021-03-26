@@ -20,10 +20,10 @@ export interface Order {
 export interface Service {
   code: string
   name: string
-  category: string
-  type: string
-  price: number
-  currency: string
+  category?: string
+  type?: string
+  price?: number
+  currency?: string
 }
 
 export interface Species {
