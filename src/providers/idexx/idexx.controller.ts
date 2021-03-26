@@ -31,11 +31,20 @@ import { IdexxMessageData } from './interfaces/idexx-message-data.interface'
     transformOptions: { enableImplicitConversion: true }
   })
 )
-@UseFilters(new ExceptionFilter())
+@UseFilters(ExceptionFilter)
 export class IdexxController {
   private readonly logger = new Logger(IdexxController.name)
 
   constructor (private readonly idexxService: IdexxService) {}
+
+  @MessagePattern(`${Provider.Idexx}.${Resource.Orders}.${Operation.Get}`)
+  async getOrder (msg: ApiEvent<IdexxMessageData>): Promise<Order> {
+    const { payload, ...metadata } = msg.data
+
+    this.logger.log(`Sending getOrder() request to '${Provider.Idexx}'`)
+
+    return await this.idexxService.getOrder(payload, metadata)
+  }
 
   @MessagePattern(`${Provider.Idexx}.${Resource.Orders}.${Operation.Create}`)
   async createOrder (msg: ApiEvent<IdexxMessageData>): Promise<Order> {

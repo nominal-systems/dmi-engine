@@ -31,6 +31,32 @@ export class IdexxService {
 
   constructor (private readonly httpService: HttpService) {}
 
+  async getOrder (
+    payload: IdPayload,
+    metadata: IdexxMessageData
+  ): Promise<Order> {
+    const {
+      providerConfiguration: { username, password, orderingBaseUrl },
+      integrationOptions
+    } = metadata
+
+    const url = `${orderingBaseUrl}/api/v1/order/${payload.id}`
+
+    const response = await this.makeGetRequest<IdexxOrder>({
+      url,
+      username,
+      password,
+      integrationOptions
+    })
+
+    return {
+      externalId: response.idexxOrderId,
+      status: response.status,
+      submissionUri: response.uiURL,
+      manifestUri: response.pdfURL
+    }
+  }
+
   async createOrder (
     payload: CreateOrderPayload,
     metadata: IdexxMessageData
@@ -52,7 +78,7 @@ export class IdexxService {
       technician
     } = payload
 
-    const data: IdexxOrder = {
+    const data: Partial<IdexxOrder> = {
       editable,
       notes,
       tests: tests.map(test => test.code),
@@ -85,12 +111,6 @@ export class IdexxService {
       data
     )
 
-    this.logger.debug(JSON.stringify(response, null, 2))
-
-    if (response.idexxOrderId == null || response.status == null) {
-      throw new RpcException('An error occurred while processing the order')
-    }
-
     return {
       externalId: response.idexxOrderId,
       status: response.status,
@@ -109,14 +129,12 @@ export class IdexxService {
 
     const url = `${orderingBaseUrl}/api/v1/order/${payload.id}`
 
-    const response = await this.makeDeleteRequest<Order>({
+    await this.makeDeleteRequest<Order>({
       url,
       username,
       password,
       integrationOptions
     })
-
-    this.logger.debug(response)
   }
 
   async getBreeds (

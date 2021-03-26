@@ -1,14 +1,14 @@
 export interface IdexxOrder {
   diagnosticImagingLocationId?: string
   editable: boolean
-  idexxOrderId?: string
+  idexxOrderId: string
   notes?: string
   patients: IdexxPatient[]
   pdfURL?: string
   petOwnerBilling: boolean
   prevRefNum?: string
   specimenCollectionDate?: string
-  status?: IdexxOrderStatus
+  status: IdexxOrderStatus
   technician?: string
   tests?: string[]
   uiURL?: string
