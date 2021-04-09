@@ -53,6 +53,28 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Building and pushing the Docker image to Amazon ECR
+
+Build the Docker image
+```bash
+docker build -t diagnostic-modality-integration-engine .
+```
+
+Tag the built image with `DockerTag` so you can push it to this repository
+```bash
+docker tag diagnostic-modality-integration-engine:${DockerTag} ${AWSAccountId}.dkr.ecr.us-east-2.amazonaws.com/diagnostic-modality-integration-engine:${DockerTag}
+```
+
+Retrieve an authentication token and authenticate your Docker client to your registry using the AWS CLI
+```bash$
+aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin ${AWSAccountId}.dkr.ecr.us-east-2.amazonaws.com
+```
+
+Push the image to the AWS ECR repository:
+```bash
+docker push ${AWSAccountId}.dkr.ecr.us-east-2.amazonaws.com/diagnostic-modality-integration-engine:${DockerTag}
+```
+
 ## Events
 
 The API Service can message the Integration Engine by pushing Events with the following structure:
