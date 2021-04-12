@@ -12,8 +12,11 @@ export interface AppConfig {
 }
 
 export interface MQTTConfig {
+  protocol: string
   host: string
   port: number
+  username: string
+  password: string
 }
 
 export interface RedisConfig {

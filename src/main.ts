@@ -11,14 +11,19 @@ async function bootstrap () {
   const configService = app.get<ConfigService<AppConfig>>(ConfigService)
   const PORT = configService.get<number>('port', 3000)
   const {
+    protocol: MQTT_PROTOCOL,
     host: MQTT_HOST,
-    port: MQTT_PORT
-  } = configService.get<MQTTConfig>('mqtt', { host: '', port: 0 })
+    port: MQTT_PORT,
+    username: MQTT_USERNAME,
+    password: MQTT_PASSWORD
+  } = configService.get<MQTTConfig>('mqtt', { protocol: '', host: '', port: 0, username: '', password: '' })
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.MQTT,
     options: {
-      url: `mqtt://${MQTT_HOST}:${MQTT_PORT}`
+      url: `${MQTT_PROTOCOL}://${MQTT_HOST}:${MQTT_PORT}`,
+      username: MQTT_USERNAME,
+      password: MQTT_PASSWORD
     }
   })
 
