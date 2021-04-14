@@ -11,7 +11,8 @@ import {
 
 export enum Provider {
   Demo = 'demo',
-  Zoetis = 'zoetis-v1'
+  Zoetis = 'zoetis-v1',
+  Idexx = 'idexx'
 }
 
 export enum Resource {

@@ -1,4 +1,10 @@
-import { Module } from '@nestjs/common'
+import { HttpModule, Module } from '@nestjs/common'
+import { IdexxController } from './idexx.controller'
+import { IdexxService } from './idexx.service'
 
-@Module({})
+@Module({
+  imports: [HttpModule],
+  controllers: [IdexxController],
+  providers: [IdexxService]
+})
 export class IdexxModule {}
