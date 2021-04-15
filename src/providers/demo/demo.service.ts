@@ -1,5 +1,4 @@
-import { Injectable } from '@nestjs/common'
-import { DemoMetadata } from './demo'
+import { HttpService, Injectable } from '@nestjs/common'
 import {
   CreateOrderPayload,
   IdPayload,
@@ -19,6 +18,9 @@ import {
   Species,
   SubmissionUrl
 } from '../../common/interfaces/provider-service'
+import { DemoMetadata } from './interfaces/demo'
+import { OrderResponse } from './interfaces/order'
+import { DemoOrderPayloadTransformer } from './provider-transformer'
 
 @Injectable()
 export class DemoProviderService
@@ -29,13 +31,47 @@ implements
     Manifest<DemoMetadata>,
     SubmissionUrl<DemoMetadata>,
     NewTests<DemoMetadata> {
+  constructor (
+    private readonly httpService: HttpService
+  ) {}
+
   async createOrder (payload: CreateOrderPayload, metadata: DemoMetadata): Promise<Order> {
-    console.log(metadata, payload)
-    throw new Error('Method not implemented.')
+    const baseUrl = metadata.providerConfiguration.url
+    const url = `${baseUrl}/demo/orders`
+    const transformer = new DemoOrderPayloadTransformer()
+    const orderPayload = transformer.transformCreateOrderPayload(payload)
+
+    const { data } = await this.httpService
+      .post<OrderResponse>(url, orderPayload, {
+      headers: {
+        ...this.getApiKeyHeaderFromMetadata(metadata)
+      }
+    }).toPromise()
+
+    return transformer.transformCreateOrderResponse(data, baseUrl)
   }
 
-  async getBatchOrders (payload: null, metadata: DemoMetadata): Promise<Order[]> {
-    throw new Error('Method not implemented.')
+  async getBatchOrders (_payload: null, metadata: DemoMetadata): Promise<Order[]> {
+    const baseUrl = metadata.providerConfiguration.url
+    const url = `${baseUrl}/demo/orders/batch`
+
+    const { data } = await this.httpService
+      .get<OrderResponse[]>(url, {
+      headers: {
+        ...this.getApiKeyHeaderFromMetadata(metadata)
+      }
+    }).toPromise()
+
+    return await this.getOrdersInBatch(baseUrl, data)
+  }
+
+  async getOrdersInBatch (baseUrl: string, orders: OrderResponse[]) {
+    const requests = orders.map(async order => {
+      return await this.httpService.get(`${baseUrl}/demo/orders/${order.id}`).toPromise()
+    })
+
+    const responses = await Promise.all(requests)
+    return responses.map((response) => response.data)
   }
 
   async getBatchResults (payload: null, metadata: DemoMetadata): Promise<Result[]> {
@@ -92,5 +128,11 @@ implements
 
   async addOrderTest (payload: OrderTestPayload, metadata: DemoMetadata): Promise<void> {
     throw new Error('Method not implemented.')
+  }
+
+  getApiKeyHeaderFromMetadata (metadata: DemoMetadata) {
+    return {
+      'X-Api-Key': metadata.integrationOptions.apiKey
+    }
   }
 }

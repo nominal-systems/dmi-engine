@@ -1,32 +1,31 @@
+import { InjectQueue } from '@nestjs/bull'
 import {
-  Body,
   Controller,
   Logger,
-  Post,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices'
+import { Queue } from 'bull'
 import { ApiEvent } from '../../common/events/api-event'
-import { MessagePattern, Payload } from '@nestjs/microservices'
-import { DemoProviderService } from './demo.service'
-import {
-  Breed,
-  Gender,
-  Order,
-  Result,
-  Service,
-  Species
-} from '../../common/interfaces/provider-service'
-import { DemoMetadata } from './demo'
 import {
   Operation,
   Provider,
   ProviderIntegration,
   Resource
 } from '../../common/interfaces/provider-integration'
-import { InjectQueue } from '@nestjs/bull'
-import { Queue } from 'bull'
-import { ConfigService } from '@nestjs/config'
+import {
+  Breed,
+  Gender,
+
+  Order,
+  Result,
+  Service,
+  Species
+} from '../../common/interfaces/provider-service'
+import { DemoProviderService } from './demo.service'
+import { DemoMetadata } from './interfaces/demo'
 
 @Controller(`integration/${Provider.Demo}`)
 export class DemoController implements ProviderIntegration {
@@ -140,8 +139,9 @@ export class DemoController implements ProviderIntegration {
     return await this.providerService.getSpecies(payload, metadata)
   }
 
-  @Post('results')
-  async fetchResults (@Body() jobData: any) {
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @EventPattern(`${Provider.Demo}.${Resource.Integration}.${Operation.Create}`)
+  async fetchResults (jobData: ApiEvent) {
     await this.resultsQueue.add(
       Provider.Demo,
       jobData,
@@ -149,8 +149,9 @@ export class DemoController implements ProviderIntegration {
     )
   }
 
-  @Post('orders')
-  async fetchOrders (@Body() jobData: any) {
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @EventPattern(`${Provider.Demo}.${Resource.Integration}.${Operation.Create}`)
+  async fetchOrders (jobData: ApiEvent) {
     await this.ordersQueue.add(
       Provider.Demo,
       jobData,

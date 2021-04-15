@@ -1,4 +1,4 @@
-import { IMetadata, ProviderConfiguration } from '../../common/interfaces/provider-service'
+import { IMetadata, ProviderConfiguration } from '../../../common/interfaces/provider-service'
 
 export interface DemoMetadata extends IMetadata {
   providerConfiguration: DemoProviderConfiguration
@@ -6,10 +6,9 @@ export interface DemoMetadata extends IMetadata {
 }
 
 export interface DemoProviderConfiguration extends ProviderConfiguration {
-  apiKey: string
+  url: string
 }
 
 export interface DemoIntegrationOptions extends ProviderConfiguration {
-  practiceId: string
-  resultTimeout: number
+  apiKey: string
 }

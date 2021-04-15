@@ -16,7 +16,13 @@ async function bootstrap () {
     port: MQTT_PORT,
     username: MQTT_USERNAME,
     password: MQTT_PASSWORD
-  } = configService.get<MQTTConfig>('mqtt', { protocol: '', host: '', port: 0, username: '', password: '' })
+  } = configService.get<MQTTConfig>('mqtt', {
+    protocol: '',
+    host: '',
+    port: 0,
+    username: '',
+    password: ''
+  })
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.MQTT,

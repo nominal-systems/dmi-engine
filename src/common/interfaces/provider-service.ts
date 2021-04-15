@@ -1,6 +1,7 @@
 import {
   CreateOrderPayload,
   IdPayload,
+  NewIntegrationPayload,
   NullPayloadPayload,
   OrderTestPayload
 } from './payloads'
@@ -94,6 +95,7 @@ export interface IntegrationOptions {
 
 export type Payload =
   | CreateOrderPayload
+  | NewIntegrationPayload
   | IdPayload
   | OrderTestPayload
   | NullPayloadPayload
