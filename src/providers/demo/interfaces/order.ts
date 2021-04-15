@@ -46,3 +46,11 @@ export interface OrderResponse {
   technician?: string
   submissionUrl: string
 }
+
+export interface ResultResponse {
+  id: string
+  modality: string
+  order: OrderResponse
+  results: any[]
+  status: string
+}

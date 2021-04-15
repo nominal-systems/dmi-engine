@@ -19,7 +19,7 @@ import {
   SubmissionUrl
 } from '../../common/interfaces/provider-service'
 import { DemoMetadata } from './interfaces/demo'
-import { OrderResponse } from './interfaces/order'
+import { OrderResponse, ResultResponse } from './interfaces/order'
 import { DemoOrderPayloadTransformer } from './provider-transformer'
 
 @Injectable()
@@ -53,10 +53,10 @@ implements
 
   async getBatchOrders (_payload: null, metadata: DemoMetadata): Promise<Order[]> {
     const baseUrl = metadata.providerConfiguration.url
-    const url = `${baseUrl}/demo/orders/batch`
+    const url = `${baseUrl}/demo/orders/batch/results`
 
     const { data } = await this.httpService
-      .get<OrderResponse[]>(url, {
+      .get<ResultResponse[]>(url, {
       headers: {
         ...this.getApiKeyHeaderFromMetadata(metadata)
       }
@@ -65,9 +65,9 @@ implements
     return await this.getOrdersInBatch(baseUrl, data)
   }
 
-  async getOrdersInBatch (baseUrl: string, orders: OrderResponse[]) {
-    const requests = orders.map(async order => {
-      return await this.httpService.get(`${baseUrl}/demo/orders/${order.id}`).toPromise()
+  async getOrdersInBatch (baseUrl: string, results: ResultResponse[]) {
+    const requests = results.map(async result => {
+      return await this.httpService.get(`${baseUrl}/demo/orders/${result.order.id}`).toPromise()
     })
 
     const responses = await Promise.all(requests)
