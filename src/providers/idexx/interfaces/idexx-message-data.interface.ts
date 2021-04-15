@@ -1,5 +1,5 @@
 import {
-  IData,
+  IMetadata,
   ProviderConfiguration
 } from '../../../common/interfaces/provider-service'
 import {
@@ -7,7 +7,7 @@ import {
   PIMS_VERSION_HEADER_NAME
 } from '../constants/idexx-api-headers.constant'
 
-export interface IdexxMessageData<Payload = any> extends IData {
+export interface IdexxMessageData<Payload = any> extends IMetadata {
   providerConfiguration: IdexxProviderConfiguration
   integrationOptions: IdexxIntegrationOptions
   payload?: Payload
