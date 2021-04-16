@@ -52,8 +52,8 @@ export interface Result {
   orderId: string
   status: string
   modality: string
-  updatedAt: string
-  createdAt: string
+  updatedAt?: string
+  createdAt?: string
   results: ResultItem[]
 }
 
