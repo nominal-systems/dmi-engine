@@ -4,7 +4,7 @@ export default (): AppConfig => ({
   port: Number(process.env.PORT ?? 3000),
   mqtt: {
     protocol: process.env.MQTT_PROTOCOL ?? 'mqtt',
-    host: process.env.MQTT_HOST ?? 'localhost',
+    hostname: process.env.MQTT_HOST ?? 'localhost',
     port: Number(process.env.MQTT_PORT ?? 1883),
     username: process.env.MQTT_USERNAME ?? '',
     password: process.env.MQTT_PASSWORD ?? ''

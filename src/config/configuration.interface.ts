@@ -13,7 +13,7 @@ export interface AppConfig {
 
 export interface MQTTConfig {
   protocol: string
-  host: string
+  hostname: string
   port: number
   username: string
   password: string
