@@ -21,10 +21,12 @@ export class DemoOrdersProcessor {
     this.logger.debug(`Orders job for integration: ${JSON.stringify(data.payload.integrationId)}`)
     try {
       const orders = await this.providerService.getBatchOrders(null, data)
-      this.client.emit('external_orders', {
-        integrationId: data.payload.integrationId,
-        orders
-      })
+      if (orders.length > 0) {
+        this.client.emit('external_orders', {
+          integrationId: data.payload.integrationId,
+          orders
+        })
+      }
     } catch (error) {
       this.logger.error(error)
     }

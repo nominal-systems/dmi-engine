@@ -11,10 +11,16 @@ import { DemoProviderService } from './demo.service'
   imports: [
     ConfigService,
     HttpModule,
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
         name: 'API_SERVICE',
-        transport: Transport.MQTT
+        inject: [ConfigService],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.MQTT,
+          options: {
+            ...configService.get('mqtt')
+          }
+        })
       }
     ]),
     BullModule.registerQueue(
