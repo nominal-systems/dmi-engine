@@ -12,6 +12,7 @@ export class DemoResultsProcessor {
 
   @Process(Provider.Demo)
   handleFetchResults (job: Job) {
-    this.logger.debug(`Results job data :${JSON.stringify(job.data)}`)
+    const { data } = job.data
+    this.logger.debug(`Results job for integration: ${JSON.stringify(data.payload.integrationId)}`)
   }
 }

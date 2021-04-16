@@ -18,7 +18,7 @@ export class DemoOrdersProcessor {
   @Process(Provider.Demo)
   async handleFetchOrders (job: Job<INewIntegrationJobMetadata<DemoMetadata>>) {
     const { data } = job.data
-    this.logger.debug(`Orders job data :${JSON.stringify(data)}`)
+    this.logger.debug(`Orders job for integration: ${JSON.stringify(data.payload.integrationId)}`)
     try {
       const orders = await this.providerService.getBatchOrders(null, data)
       this.client.emit('external_orders', {
