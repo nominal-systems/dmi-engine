@@ -10,6 +10,7 @@ import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices'
 import { Queue } from 'bull'
 import { ApiEvent } from '../../common/events/api-event'
 import {
+  INewIntegrationJobMetadata,
   Operation,
   Provider,
   ProviderIntegration,
@@ -141,8 +142,9 @@ export class DemoController implements ProviderIntegration {
   @UsePipes(new ValidationPipe({ transform: true }))
   @EventPattern(`${Provider.Demo}.${Resource.Integration}.${Operation.Create}`)
   async fetchResults (jobData: ApiEvent) {
+    const data = jobData as INewIntegrationJobMetadata<DemoMetadata>
     await this.resultsQueue.add(
-      Provider.Demo,
+      `${Provider.Demo}.${data.data.payload.integrationId}`,
       jobData,
       this.configService.get('jobs.results')
     )
@@ -151,8 +153,9 @@ export class DemoController implements ProviderIntegration {
   @UsePipes(new ValidationPipe({ transform: true }))
   @EventPattern(`${Provider.Demo}.${Resource.Integration}.${Operation.Create}`)
   async fetchOrders (jobData: ApiEvent) {
+    const data = jobData as INewIntegrationJobMetadata<DemoMetadata>
     await this.ordersQueue.add(
-      Provider.Demo,
+      `${Provider.Demo}.${data.data.payload.integrationId}`,
       jobData,
       this.configService.get('jobs.orders')
     )
