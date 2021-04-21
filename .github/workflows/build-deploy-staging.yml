@@ -17,16 +17,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-#     - uses: azure/docker-login@v1
-#         with:
-#           login-server: ${{ secrets.DEV_REGISTRY_SERVER }}
-#           username: ${{ secrets.DEV_REGISTRY_USERNAME }}
-#           password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
     - name: Build the Docker image
       run: |
         docker build . \
         --file Dockerfile \
         --target production \
         --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-#     - name: Push Docker image
-#       run: docker push ${{ env.REGISTRY_SERVER }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+    - name: Docker ECR
+      uses: appleboy/docker-ecr-action@v0.0.3
+      with:
+        access_key: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
+        secret_key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+        registry: diagnostic-modality-integration-engine
+        region: us-east-2
+    
