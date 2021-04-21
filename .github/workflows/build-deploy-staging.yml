@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   
 env: 
-  DOCKER_IMAGE: dmi/engine
+  DOCKER_IMAGE: diagnostic-modality-integration-engine
 
 jobs:
 
@@ -23,11 +23,15 @@ jobs:
         --file Dockerfile \
         --target production \
         --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
-    - name: Docker ECR
+    - name: List Docker images
+      run: |
+        docker images
+    - name: Push Docker image to Amazon ECR
       uses: appleboy/docker-ecr-action@v0.0.3
       with:
         access_key: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
         secret_key: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
-        registry: 216821345641.dkr.ecr.us-east-2.amazonaws.com/diagnostic-modality-integration-engine
+        registry: 216821345641.dkr.ecr.us-east-2.amazonaws.com/${{ env.DOCKER_IMAGE }}
+        tags: ${{ github.sha }}
         region: us-east-2
     
