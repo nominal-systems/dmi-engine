@@ -12,7 +12,7 @@ env:
 
 jobs:
 
-  build-push-deplopy:
+  build-push-and-deploy:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -43,7 +43,8 @@ jobs:
       with:
         task-definition: task-definition.json
         image: 216821345641.dkr.ecr.us-east-2.amazonaws.com/diagnostic-modality-integration-engine:${{ github.sha }}
-    - name: Update ECS Task definition with new environment variables
+        container-name: ${{ env.DOCKER_IMAGE }}
+    - name: Update ECS Task definition and deploy
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
         task-definition: task-definition.json
