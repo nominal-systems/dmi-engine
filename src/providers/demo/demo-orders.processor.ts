@@ -6,7 +6,7 @@ import { INewIntegrationJobMetadata, Provider } from '../../common/interfaces/pr
 import { DemoProviderService } from './demo.service'
 import { DemoMetadata } from './interfaces/demo'
 
-@Processor('orders')
+@Processor(`${Provider.Demo}.orders`)
 export class DemoOrdersProcessor {
   constructor (
     private readonly providerService: DemoProviderService,
@@ -15,7 +15,7 @@ export class DemoOrdersProcessor {
 
   private readonly logger = new Logger(DemoOrdersProcessor.name)
 
-  @Process(Provider.Demo)
+  @Process()
   async handleFetchOrders (job: Job<INewIntegrationJobMetadata<DemoMetadata>>) {
     const { data } = job.data
     this.logger.debug(`Orders job for integration: ${JSON.stringify(data.payload.integrationId)}`)
@@ -27,6 +27,7 @@ export class DemoOrdersProcessor {
           orders
         })
       }
+      return { orders: orders.length }
     } catch (error) {
       this.logger.error(error)
     }

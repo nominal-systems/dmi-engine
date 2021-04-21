@@ -1,40 +1,41 @@
+import { InjectQueue } from '@nestjs/bull'
 import {
   Body,
   Controller,
   Logger,
-  Post,
   UsePipes,
   ValidationPipe
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices'
+import { Queue } from 'bull'
 import { ApiEvent } from '../../../common/events/api-event'
-import { MessagePattern, Payload } from '@nestjs/microservices'
-import { ZoetisProviderService } from '../zoetis.service'
+import {
+  INewIntegrationJobMetadata,
+  Operation,
+  Provider,
+  ProviderIntegration,
+  Resource
+} from '../../../common/interfaces/provider-integration'
 import {
   Breed,
   Gender,
+  IMetadata,
   Order,
   Result,
   Service,
   Species
 } from '../../../common/interfaces/provider-service'
 import { ZoetisMetadata } from '../interfaces/metadata.interface'
-import {
-  Operation,
-  Provider,
-  ProviderIntegration,
-  Resource
-} from '../../../common/interfaces/provider-integration'
-import { InjectQueue } from '@nestjs/bull'
-import { Queue } from 'bull'
-import { ConfigService } from '@nestjs/config'
+import { ZoetisProviderService } from '../zoetis.service'
 
 @Controller(`integration/${Provider.Zoetis}`)
 export class ZoetisController implements ProviderIntegration {
   constructor (
     private readonly configService: ConfigService,
     private readonly providerService: ZoetisProviderService,
-    @InjectQueue('results') private readonly resultsQueue: Queue,
-    @InjectQueue('orders') private readonly ordersQueue: Queue
+    @InjectQueue(`${Provider.Zoetis}.results`) private readonly resultsQueue: Queue,
+    @InjectQueue(`${Provider.Zoetis}.orders`) private readonly ordersQueue: Queue
   ) {}
 
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -140,21 +141,25 @@ export class ZoetisController implements ProviderIntegration {
     return await this.providerService.getSpecies(payload, metadata)
   }
 
-  @Post('results')
   async fetchResults (@Body() jobData: any) {
-    await this.resultsQueue.add(
-      Provider.Zoetis,
-      jobData,
-      this.configService.get('jobs.results')
-    )
+    throw new Error('Not implemented')
   }
 
-  @Post('orders')
   async fetchOrders (@Body() jobData: any) {
+    throw new Error('Not implemented')
+  }
+
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @EventPattern(`${Provider.Zoetis}.${Resource.Integration}.${Operation.Create}`)
+  async handleNewIntegration (jobData: INewIntegrationJobMetadata<IMetadata>) {
     await this.ordersQueue.add(
-      Provider.Zoetis,
       jobData,
       this.configService.get('jobs.orders')
+    )
+
+    await this.resultsQueue.add(
+      jobData,
+      this.configService.get('jobs.results')
     )
   }
 }

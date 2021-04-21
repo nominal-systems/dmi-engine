@@ -59,4 +59,5 @@ export interface ProviderIntegration {
   getBreeds: (msg: ApiEvent, context?: MqttContext) => Promise<Breed[]>
   fetchResults: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
   fetchOrders: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
+  handleNewIntegration: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
 }

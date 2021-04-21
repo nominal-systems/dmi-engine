@@ -19,6 +19,7 @@ import {
 import {
   Breed,
   Gender,
+  IMetadata,
   Order,
   Result,
   Service,
@@ -32,8 +33,8 @@ export class DemoController implements ProviderIntegration {
   constructor (
     private readonly configService: ConfigService,
     private readonly providerService: DemoProviderService,
-    @InjectQueue('results') private readonly resultsQueue: Queue,
-    @InjectQueue('orders') private readonly ordersQueue: Queue
+    @InjectQueue(`${Provider.Demo}.results`) private readonly resultsQueue: Queue,
+    @InjectQueue(`${Provider.Demo}.orders`) private readonly ordersQueue: Queue
   ) {}
 
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -139,25 +140,25 @@ export class DemoController implements ProviderIntegration {
     return await this.providerService.getSpecies(payload, metadata)
   }
 
-  @UsePipes(new ValidationPipe({ transform: true }))
-  @EventPattern(`${Provider.Demo}.${Resource.Integration}.${Operation.Create}`)
   async fetchResults (jobData: ApiEvent) {
-    const data = jobData as INewIntegrationJobMetadata<DemoMetadata>
-    await this.resultsQueue.add(
-      `${Provider.Demo}.${data.data.payload.integrationId}`,
-      jobData,
-      this.configService.get('jobs.results')
-    )
+    throw new Error('Not implemented')
+  }
+
+  async fetchOrders (jobData: ApiEvent) {
+    throw new Error('Not implemented')
   }
 
   @UsePipes(new ValidationPipe({ transform: true }))
   @EventPattern(`${Provider.Demo}.${Resource.Integration}.${Operation.Create}`)
-  async fetchOrders (jobData: ApiEvent) {
-    const data = jobData as INewIntegrationJobMetadata<DemoMetadata>
+  async handleNewIntegration (jobData: INewIntegrationJobMetadata<IMetadata>) {
     await this.ordersQueue.add(
-      `${Provider.Demo}.${data.data.payload.integrationId}`,
       jobData,
       this.configService.get('jobs.orders')
+    )
+
+    await this.resultsQueue.add(
+      jobData,
+      this.configService.get('jobs.results')
     )
   }
 }

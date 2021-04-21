@@ -64,12 +64,18 @@ implements
       }
     }).toPromise()
 
-    return await this.getOrdersInBatch(baseUrl, data)
+    return await this.getOrdersInBatch(baseUrl, data, metadata)
   }
 
-  async getOrdersInBatch (baseUrl: string, results: ResultResponse[]) {
+  async getOrdersInBatch (baseUrl: string, results: ResultResponse[], metadata: DemoMetadata) {
     const requests = results.map(async result => {
-      return await this.httpService.get(`${baseUrl}/demo/orders/${result.order.id}`).toPromise()
+      return await this.httpService
+        .get(`${baseUrl}/demo/orders/${result.order.id}`,
+          {
+            headers: {
+              ...this.getApiKeyHeaderFromMetadata(metadata)
+            }
+          }).toPromise()
     })
 
     const responses = await Promise.all(requests)
