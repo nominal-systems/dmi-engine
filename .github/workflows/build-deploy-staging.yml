@@ -31,7 +31,8 @@ jobs:
       with:
         access_key: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
         secret_key: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
-        registry: 216821345641.dkr.ecr.us-east-2.amazonaws.com/${{ env.DOCKER_IMAGE }}
+        registry: 216821345641.dkr.ecr.us-east-2.amazonaws.com
+        repo: ${{ env.DOCKER_IMAGE }}
         tags: ${{ github.sha }}
         region: us-east-2
     
