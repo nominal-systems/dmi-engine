@@ -1,5 +1,7 @@
 # Diagnostic Modality Integration Engine
 
+[![Build and Deploy - Staging](https://github.com/line-studio/diagnostic-modality-integration-engine/actions/workflows/build-deploy-staging.yml/badge.svg?branch=main)](https://github.com/line-studio/diagnostic-modality-integration-engine/actions/workflows/build-deploy-staging.yml)
+
 ## Description
 
 Diagnostic Modality Integration Engine built using [Nest](https://github.com/nestjs/nest).
