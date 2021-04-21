@@ -28,6 +28,6 @@ jobs:
       with:
         access_key: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
         secret_key: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
-        registry: diagnostic-modality-integration-engine
+        registry: 216821345641.dkr.ecr.us-east-2.amazonaws.com/diagnostic-modality-integration-engine
         region: us-east-2
     
