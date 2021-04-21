@@ -26,8 +26,8 @@ jobs:
     - name: Docker ECR
       uses: appleboy/docker-ecr-action@v0.0.3
       with:
-        access_key: ${{ secrets.TEST_AWS_ACCESS_KEY_ID }}
-        secret_key: ${{ secrets.TEST_AWS_SECRET_ACCESS_KEY }}
+        access_key: ${{ secrets.STAGING_AWS_ACCESS_KEY_ID }}
+        secret_key: ${{ secrets.STAGING_AWS_SECRET_ACCESS_KEY }}
         registry: diagnostic-modality-integration-engine
         region: us-east-2
     
