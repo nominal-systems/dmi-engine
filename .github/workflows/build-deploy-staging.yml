@@ -1,0 +1,32 @@
+name: Build and Deploy - Staging
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  
+env: 
+  DOCKER_IMAGE: dmi/engine
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+#     - uses: azure/docker-login@v1
+#         with:
+#           login-server: ${{ secrets.DEV_REGISTRY_SERVER }}
+#           username: ${{ secrets.DEV_REGISTRY_USERNAME }}
+#           password: ${{ secrets.DEV_REGISTRY_PASSWORD }}
+    - name: Build the Docker image
+      run: |
+        docker build . \
+        --file Dockerfile \
+        --target production \
+        --tag ${{ env.DOCKER_IMAGE }}:${{ github.sha }}
+#     - name: Push Docker image
+#       run: docker push ${{ env.REGISTRY_SERVER }}/${{ env.DOCKER_IMAGE }}:${{ github.sha }}
