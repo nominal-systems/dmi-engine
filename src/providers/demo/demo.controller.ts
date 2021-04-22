@@ -1,10 +1,5 @@
 import { InjectQueue } from '@nestjs/bull'
-import {
-  Controller,
-  Logger,
-  UsePipes,
-  ValidationPipe
-} from '@nestjs/common'
+import { Controller, Logger, UsePipes, ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices'
 import { Queue } from 'bull'
@@ -33,7 +28,8 @@ export class DemoController implements ProviderIntegration {
   constructor (
     private readonly configService: ConfigService,
     private readonly providerService: DemoProviderService,
-    @InjectQueue(`${Provider.Demo}.results`) private readonly resultsQueue: Queue,
+    @InjectQueue(`${Provider.Demo}.results`)
+    private readonly resultsQueue: Queue,
     @InjectQueue(`${Provider.Demo}.orders`) private readonly ordersQueue: Queue
   ) {}
 
@@ -151,14 +147,16 @@ export class DemoController implements ProviderIntegration {
   @UsePipes(new ValidationPipe({ transform: true }))
   @EventPattern(`${Provider.Demo}.${Resource.Integration}.${Operation.Create}`)
   async handleNewIntegration (jobData: INewIntegrationJobMetadata<IMetadata>) {
-    await this.ordersQueue.add(
-      jobData,
-      this.configService.get('jobs.orders')
-    )
+    const jobId = `${Provider.Demo}.${jobData.data.payload.integrationId}`
 
-    await this.resultsQueue.add(
-      jobData,
-      this.configService.get('jobs.results')
-    )
+    await this.ordersQueue.add(jobData, {
+      ...this.configService.get('jobs.orders'),
+      jobId
+    })
+
+    await this.resultsQueue.add(jobData, {
+      ...this.configService.get('jobs.results'),
+      jobId
+    })
   }
 }
