@@ -55,10 +55,10 @@ implements
 
   async getBatchOrders (_payload: null, metadata: DemoMetadata): Promise<Order[]> {
     const baseUrl = metadata.providerConfiguration.url
-    const url = `${baseUrl}/demo/orders/batch/results`
+    const url = `${baseUrl}/demo/orders/batch`
 
     const { data } = await this.httpService
-      .get<ResultResponse[]>(url, {
+      .get<OrderResponse[]>(url, {
       headers: {
         ...this.getApiKeyHeaderFromMetadata(metadata)
       }
@@ -67,15 +67,14 @@ implements
     return await this.getOrdersInBatch(baseUrl, data, metadata)
   }
 
-  async getOrdersInBatch (baseUrl: string, results: ResultResponse[], metadata: DemoMetadata) {
-    const requests = results.map(async result => {
+  async getOrdersInBatch (baseUrl: string, orders: OrderResponse[], metadata: DemoMetadata) {
+    const requests = orders.map(async order => {
       return await this.httpService
-        .get(`${baseUrl}/demo/orders/${result.order.id}`,
-          {
-            headers: {
-              ...this.getApiKeyHeaderFromMetadata(metadata)
-            }
-          }).toPromise()
+        .get(`${baseUrl}/demo/orders/${order.id}`, {
+          headers: {
+            ...this.getApiKeyHeaderFromMetadata(metadata)
+          }
+        }).toPromise()
     })
 
     const responses = await Promise.all(requests)
