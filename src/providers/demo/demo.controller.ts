@@ -1,40 +1,36 @@
-import {
-  Body,
-  Controller,
-  Logger,
-  Post,
-  UsePipes,
-  ValidationPipe
-} from '@nestjs/common'
+import { InjectQueue } from '@nestjs/bull'
+import { Controller, Logger, UsePipes, ValidationPipe } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices'
+import { Queue } from 'bull'
 import { ApiEvent } from '../../common/events/api-event'
-import { MessagePattern, Payload } from '@nestjs/microservices'
-import { DemoProviderService } from './demo.service'
 import {
-  Breed,
-  Gender,
-  Order,
-  Result,
-  Service,
-  Species
-} from '../../common/interfaces/provider-service'
-import { DemoMetadata } from './demo'
-import {
+  INewIntegrationJobMetadata,
   Operation,
   Provider,
   ProviderIntegration,
   Resource
 } from '../../common/interfaces/provider-integration'
-import { InjectQueue } from '@nestjs/bull'
-import { Queue } from 'bull'
-import { ConfigService } from '@nestjs/config'
+import {
+  Breed,
+  Gender,
+  IMetadata,
+  Order,
+  Result,
+  Service,
+  Species
+} from '../../common/interfaces/provider-service'
+import { DemoProviderService } from './demo.service'
+import { DemoMetadata } from './interfaces/demo'
 
 @Controller(`integration/${Provider.Demo}`)
 export class DemoController implements ProviderIntegration {
   constructor (
     private readonly configService: ConfigService,
     private readonly providerService: DemoProviderService,
-    @InjectQueue('results') private readonly resultsQueue: Queue,
-    @InjectQueue('orders') private readonly ordersQueue: Queue
+    @InjectQueue(`${Provider.Demo}.results`)
+    private readonly resultsQueue: Queue,
+    @InjectQueue(`${Provider.Demo}.orders`) private readonly ordersQueue: Queue
   ) {}
 
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -140,21 +136,27 @@ export class DemoController implements ProviderIntegration {
     return await this.providerService.getSpecies(payload, metadata)
   }
 
-  @Post('results')
-  async fetchResults (@Body() jobData: any) {
-    await this.resultsQueue.add(
-      Provider.Demo,
-      jobData,
-      this.configService.get('jobs.results')
-    )
+  async fetchResults (jobData: ApiEvent) {
+    throw new Error('Not implemented')
   }
 
-  @Post('orders')
-  async fetchOrders (@Body() jobData: any) {
-    await this.ordersQueue.add(
-      Provider.Demo,
-      jobData,
-      this.configService.get('jobs.orders')
-    )
+  async fetchOrders (jobData: ApiEvent) {
+    throw new Error('Not implemented')
+  }
+
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @EventPattern(`${Provider.Demo}.${Resource.Integration}.${Operation.Create}`)
+  async handleNewIntegration (jobData: INewIntegrationJobMetadata<IMetadata>) {
+    const jobId = `${Provider.Demo}.${jobData.data.payload.integrationId}`
+
+    await this.ordersQueue.add(jobData, {
+      ...this.configService.get('jobs.orders'),
+      jobId
+    })
+
+    await this.resultsQueue.add(jobData, {
+      ...this.configService.get('jobs.results'),
+      jobId
+    })
   }
 }

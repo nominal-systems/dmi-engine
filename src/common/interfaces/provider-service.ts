@@ -1,6 +1,7 @@
 import {
   CreateOrderPayload,
   IdPayload,
+  NewIntegrationPayload,
   NullPayloadPayload,
   OrderTestPayload
 } from './payloads'
@@ -51,8 +52,8 @@ export interface Result {
   orderId: string
   status: string
   modality: string
-  updatedAt: string
-  createdAt: string
+  updatedAt?: string
+  createdAt?: string
   results: ResultItem[]
 }
 
@@ -94,6 +95,7 @@ export interface IntegrationOptions {
 
 export type Payload =
   | CreateOrderPayload
+  | NewIntegrationPayload
   | IdPayload
   | OrderTestPayload
   | NullPayloadPayload

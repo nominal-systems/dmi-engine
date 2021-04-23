@@ -1,6 +1,7 @@
 import { BullModule } from '@nestjs/bull'
 import { HttpModule, Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { Provider } from '../../common/interfaces/provider-integration'
 import { XmlModule } from '../../xml/xml.module'
 import { ZoetisOrdersProcessor } from './providers/zoetis-orders.processor'
 import { ZoetisResultsProcessor } from './providers/zoetis-results.processor'
@@ -12,10 +13,10 @@ import { ZoetisProviderService } from './zoetis.service'
     ConfigService,
     BullModule.registerQueue(
       {
-        name: 'results'
+        name: `${Provider.Zoetis}.results`
       },
       {
-        name: 'orders'
+        name: `${Provider.Zoetis}.orders`
       }
     ),
     HttpModule,

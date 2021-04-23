@@ -1,5 +1,4 @@
-export interface CreateOrderPayload {
-  integrationId: string
+export interface DemoOrderPayload {
   id: string
   patient: Patient
   client: Client
@@ -38,17 +37,20 @@ export interface Test {
   code: string
 }
 
-export interface IdPayload {
+export interface OrderResponse {
+  editable: boolean
   id: string
+  manifestUrl: string
+  notes: string
+  status: string
+  technician?: string
+  submissionUrl: string
 }
 
-export interface OrderTestPayload {
+export interface ResultResponse {
   id: string
-  tests: Test[]
-}
-
-export type NullPayloadPayload = null
-
-export interface NewIntegrationPayload {
-  integrationId: string
+  modality: string
+  order: OrderResponse
+  results: any[]
+  status: string
 }

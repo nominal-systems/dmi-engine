@@ -1,6 +1,10 @@
 import { BullModule } from '@nestjs/bull'
 import { HttpModule, Module } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { ClientsModule, Transport } from '@nestjs/microservices'
+import { Provider } from '../../common/interfaces/provider-integration'
+import { DemoOrdersProcessor } from './demo-orders.processor'
+import { DemoResultsProcessor } from './demo-results.processor'
 import { DemoController } from './demo.controller'
 import { DemoProviderService } from './demo.service'
 
@@ -8,12 +12,24 @@ import { DemoProviderService } from './demo.service'
   imports: [
     ConfigService,
     HttpModule,
+    ClientsModule.registerAsync([
+      {
+        name: 'API_SERVICE',
+        inject: [ConfigService],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.MQTT,
+          options: {
+            ...configService.get('mqtt')
+          }
+        })
+      }
+    ]),
     BullModule.registerQueue(
       {
-        name: 'results'
+        name: `${Provider.Demo}.results`
       },
       {
-        name: 'orders'
+        name: `${Provider.Demo}.orders`
       }
     )
   ],
@@ -21,7 +37,9 @@ import { DemoProviderService } from './demo.service'
     DemoController
   ],
   providers: [
-    DemoProviderService
+    DemoProviderService,
+    DemoOrdersProcessor,
+    DemoResultsProcessor
   ]
 })
 export class DemoModule {}

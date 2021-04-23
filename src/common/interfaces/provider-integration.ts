@@ -1,8 +1,11 @@
 import { MqttContext } from '@nestjs/microservices'
 import { ApiEvent } from '../events/api-event'
+import { NewIntegrationPayload } from './payloads'
 import {
   Breed,
   Gender,
+  IMetadata,
+  IPayload,
   Order,
   Result,
   Service,
@@ -20,7 +23,8 @@ export enum Resource {
   Breeds = 'breeds',
   Genders = 'genders',
   Services = 'services',
-  Species = 'species'
+  Species = 'species',
+  Integration = 'integration'
 }
 
 export enum Operation {
@@ -32,6 +36,13 @@ export enum Operation {
   ResultsBatch = 'results.batch',
   List = 'list',
   Batch = 'batch'
+}
+
+export interface INewIntegrationJobMetadata<T extends IMetadata> {
+  id: string
+  type: string
+  version: string
+  data: IPayload<NewIntegrationPayload> & T
 }
 
 export interface ProviderIntegration {
@@ -46,6 +57,7 @@ export interface ProviderIntegration {
   getGenders: (msg: ApiEvent, context?: MqttContext) => Promise<Gender[]>
   getSpecies: (msg: ApiEvent, context?: MqttContext) => Promise<Species[]>
   getBreeds: (msg: ApiEvent, context?: MqttContext) => Promise<Breed[]>
-  fetchResults: (jobData: any) => any
-  fetchOrders: (jobData: any) => any
+  fetchResults: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
+  fetchOrders: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
+  handleNewIntegration: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
 }
