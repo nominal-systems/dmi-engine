@@ -20,7 +20,8 @@ import { ZoetisModule } from './providers/zoetis/zoetis.module'
         redis: {
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT')
-        }
+        },
+        defaultJobOptions: { removeOnComplete: true }
       }),
       inject: [ConfigService]
     }),
