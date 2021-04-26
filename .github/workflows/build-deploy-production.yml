@@ -1,17 +1,17 @@
-name: Build and Deploy to Staging
+name: Build and Deploy to Production
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - '**'
   workflow_dispatch:
   
 env: 
   DOCKER_IMAGE_NAME: diagnostic-modality-integration-engine
   AWS_ACCOUNT_ID: 216821345641
-  ECS_TASK_DEFINITION: line-dev-dmi-diagnostic-modality-integration-engine-task-definition
-  ECS_SERVICE: line-dev-diagnostic-modality-integration-engine-service
-  ECS_CLUSTER: line-dev-dmi-cluster
+  ECS_TASK_DEFINITION: instinct-prod-dmi-diagnostic-modality-integration-engine-task-definition
+  ECS_SERVICE: instinct-prod-diagnostic-modality-integration-engine-service
+  ECS_CLUSTER: instinct-prod-dmi-cluster
 
 jobs:
   build-push-and-deploy:
