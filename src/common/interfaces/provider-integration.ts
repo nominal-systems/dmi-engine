@@ -11,6 +11,7 @@ import {
   Service,
   Species
 } from './provider-service'
+import { ReferenceDataResponse } from './reference-data-response'
 
 export enum Provider {
   Demo = 'demo',
@@ -47,17 +48,17 @@ export interface INewIntegrationJobMetadata<T extends IMetadata> {
 
 export interface ProviderIntegration {
   createOrder: (msg: ApiEvent, context?: MqttContext) => Promise<Order>
-  getBatchOrders: (msg: ApiEvent, context?: MqttContext) => Promise<Order[]>
+  getBatchOrders?: (msg: ApiEvent, context?: MqttContext) => Promise<Order[]>
   getBatchResults: (msg: ApiEvent, context?: MqttContext) => Promise<Result[]>
   getOrder: (msg: ApiEvent, context?: MqttContext) => Promise<Order>
   getOrderResult: (msg: ApiEvent, context?: MqttContext) => Promise<Result>
   cancelOrder: (msg: ApiEvent, context?: MqttContext) => Promise<void>
   cancelOrderTest: (msg: ApiEvent, context?: MqttContext) => Promise<void>
-  getServices: (msg: ApiEvent, context?: MqttContext) => Promise<Service[]>
-  getGenders: (msg: ApiEvent, context?: MqttContext) => Promise<Gender[]>
-  getSpecies: (msg: ApiEvent, context?: MqttContext) => Promise<Species[]>
-  getBreeds: (msg: ApiEvent, context?: MqttContext) => Promise<Breed[]>
-  fetchResults: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
-  fetchOrders: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
+  getServices: (msg: ApiEvent, context?: MqttContext) => Promise<ReferenceDataResponse<Service> | Service[]>
+  getGenders: (msg: ApiEvent, context?: MqttContext) => Promise<ReferenceDataResponse<Gender> | Gender[]>
+  getSpecies: (msg: ApiEvent, context?: MqttContext) => Promise<ReferenceDataResponse<Species> | Species[]>
+  getBreeds: (msg: ApiEvent, context?: MqttContext) => Promise<ReferenceDataResponse<Breed> | Breed[]>
+  fetchResults?: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
+  fetchOrders?: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
   handleNewIntegration: (jobData: INewIntegrationJobMetadata<IMetadata>) => any
 }

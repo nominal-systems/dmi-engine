@@ -1,15 +1,21 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common'
 import { RpcException } from '@nestjs/microservices'
-import { CreateOrderPayload, IdPayload } from '../../common/interfaces/payloads'
+import {
+  CreateOrderPayload,
+  IdPayload,
+  OrderTestPayload
+} from '../../common/interfaces/payloads'
 import {
   Breed,
   Gender,
   Order,
+  Result,
   Service,
   Species
 } from '../../common/interfaces/provider-service'
 import { ReferenceDataResponse } from '../../common/interfaces/reference-data-response'
 import { getFullName } from '../../common/utils/get-full-name.util'
+import { NonNullableOptional } from '../../common/utils/object.utils'
 import {
   PIMS_ID_HEADER_NAME,
   PIMS_VERSION_HEADER_NAME
@@ -24,6 +30,10 @@ import {
   IdexxRefDataResponse,
   IdexxTest
 } from './interfaces/idexx-reference-data.interface'
+import {
+  IdexxLatestResults,
+  IdexxSearchResultResponse
+} from './interfaces/idexx-results.interface'
 
 @Injectable()
 export class IdexxService {
@@ -101,7 +111,7 @@ export class IdexxService {
       ]
     }
 
-    const response = await this.makePostRequest<NonNullable<IdexxOrder>>(
+    const response = await this.makePostRequest<IdexxOrder>(
       {
         url,
         username,
@@ -134,6 +144,84 @@ export class IdexxService {
       username,
       password,
       integrationOptions
+    })
+  }
+
+  async cancelOrderTest (
+    payload: OrderTestPayload,
+    metadata: IdexxMessageData
+  ) {
+    throw new RpcException('Method not yet implemented')
+  }
+
+  async getOrderResult (payload: IdPayload, metadata: IdexxMessageData): Promise<Result> {
+    const {
+      providerConfiguration: { username, password, orderingBaseUrl },
+      integrationOptions
+    } = metadata
+
+    const url = `${orderingBaseUrl}/api/v3/results/search?requisitionId=${payload.id}`
+
+    const response = await this.makeGetRequest<IdexxSearchResultResponse>({
+      url,
+      username,
+      password,
+      integrationOptions
+    })
+
+    const result = response.results[0]
+
+    return {
+      id: result.resultId,
+      modality: result.modality,
+      orderId: result.requisitionId ?? result.orderId,
+      results: result.runSummaries.map(runSummary => ({
+        code: runSummary.code,
+        name: runSummary.name,
+        runDate: runSummary.runDate,
+        sampleType: runSummary.sampleType,
+        items: [],
+        notes: ''
+      })),
+      status: result.status
+    }
+  }
+
+  async getBatchResults (
+    payload: any,
+    metadata: IdexxMessageData
+  ): Promise<Result[]> {
+    const {
+      providerConfiguration: { username, password, orderingBaseUrl },
+      integrationOptions
+    } = metadata
+
+    const url = `${orderingBaseUrl}/api/v3/results/latest`
+
+    const response = await this.makeGetRequest<
+      NonNullableOptional<IdexxLatestResults>
+    >({
+      url,
+      username,
+      password,
+      integrationOptions
+    })
+
+    return response.results.map<Result>(result => {
+      return {
+        id: result.resultId,
+        modality: result.modality,
+        orderId: result.requisitionId ?? result.orderId,
+        results: result.runSummaries.map(runSummary => ({
+          code: runSummary.code,
+          name: runSummary.name,
+          runDate: runSummary.runDate,
+          sampleType: runSummary.sampleType,
+          items: [],
+          notes: ''
+        })),
+        status: result.status
+      }
     })
   }
 
