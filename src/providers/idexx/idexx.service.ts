@@ -154,13 +154,16 @@ export class IdexxService {
     throw new RpcException('Method not yet implemented')
   }
 
-  async getOrderResult (payload: IdPayload, metadata: IdexxMessageData): Promise<Result> {
+  async getOrderResult (
+    payload: IdPayload,
+    metadata: IdexxMessageData
+  ): Promise<Result> {
     const {
-      providerConfiguration: { username, password, orderingBaseUrl },
+      providerConfiguration: { username, password, resultBaseUrl },
       integrationOptions
     } = metadata
 
-    const url = `${orderingBaseUrl}/api/v3/results/search?requisitionId=${payload.id}`
+    const url = `${resultBaseUrl}/api/v3/results/search?requisitionId=${payload.id}`
 
     const response = await this.makeGetRequest<IdexxSearchResultResponse>({
       url,
@@ -192,11 +195,11 @@ export class IdexxService {
     metadata: IdexxMessageData
   ): Promise<Result[]> {
     const {
-      providerConfiguration: { username, password, orderingBaseUrl },
+      providerConfiguration: { username, password, resultBaseUrl },
       integrationOptions
     } = metadata
 
-    const url = `${orderingBaseUrl}/api/v3/results/latest`
+    const url = `${resultBaseUrl}/api/v3/results/latest`
 
     const response = await this.makeGetRequest<
       NonNullableOptional<IdexxLatestResults>
