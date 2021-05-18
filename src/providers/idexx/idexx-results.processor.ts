@@ -33,7 +33,10 @@ export class IdexxResultsProcessor {
     try {
       const { payload, ...metadata } = data
 
-      const results = await this.idexxService.getBatchResults(payload, metadata)
+      const { results, batchId } = await this.idexxService.getBatchResults(
+        payload,
+        metadata
+      )
 
       const orderIds = [...new Set(results.map(result => result.orderId))]
 
@@ -58,6 +61,8 @@ export class IdexxResultsProcessor {
           }
         })
       })
+
+      await this.idexxService.resultsConfirm({ batchId }, metadata)
 
       return { orders: orders.length }
     } catch (error) {

@@ -25,6 +25,7 @@ import {
   IdexxOrder,
   IdexxWeightUnits
 } from './interfaces/idexx-order.interface'
+import { IdexxResultConfirmPayload } from './interfaces/idexx-payloads.interface'
 import {
   IdexxBreed,
   IdexxRefDataResponse,
@@ -34,6 +35,7 @@ import {
   IdexxLatestResults,
   IdexxSearchResultResponse
 } from './interfaces/idexx-results.interface'
+import { BatchResultsResponse } from '../../common/interfaces/responses.interface'
 
 @Injectable()
 export class IdexxService {
@@ -193,7 +195,7 @@ export class IdexxService {
   async getBatchResults (
     payload: any,
     metadata: IdexxMessageData
-  ): Promise<Result[]> {
+  ): Promise<BatchResultsResponse> {
     const {
       providerConfiguration: { username, password, resultBaseUrl },
       integrationOptions
@@ -210,22 +212,25 @@ export class IdexxService {
       integrationOptions
     })
 
-    return response.results.map<Result>(result => {
-      return {
-        id: result.resultId,
-        modality: result.modality,
-        orderId: result.requisitionId ?? result.orderId,
-        results: result.runSummaries.map(runSummary => ({
-          code: runSummary.code,
-          name: runSummary.name,
-          runDate: runSummary.runDate,
-          sampleType: runSummary.sampleType,
-          items: [],
-          notes: ''
-        })),
-        status: result.status
-      }
-    })
+    return {
+      batchId: response.batchId,
+      results: response.results.map<Result>(result => {
+        return {
+          id: result.resultId,
+          modality: result.modality,
+          orderId: result.requisitionId ?? result.orderId,
+          results: result.runSummaries.map(runSummary => ({
+            code: runSummary.code,
+            name: runSummary.name,
+            runDate: runSummary.runDate,
+            sampleType: runSummary.sampleType,
+            items: [],
+            notes: ''
+          })),
+          status: result.status
+        }
+      })
+    }
   }
 
   async getBreeds (
@@ -351,6 +356,52 @@ export class IdexxService {
         type: item.inHouse ? 'IN_HOUSE' : 'PAID'
       })),
       hash: version
+    }
+  }
+
+  async resultsConfirm (
+    payload: IdexxResultConfirmPayload,
+    metadata: IdexxMessageData
+  ): Promise<BatchResultsResponse> {
+    const {
+      providerConfiguration: { username, password, resultBaseUrl },
+      integrationOptions
+    } = metadata
+
+    const { batchId } = payload
+
+    const url = `${resultBaseUrl}/api/v3/results/latest/confirm/${batchId}`
+
+    const response = await this.makePostRequest<
+      NonNullableOptional<IdexxLatestResults>
+    >(
+      {
+        url,
+        username,
+        password,
+        integrationOptions
+      },
+      null
+    )
+
+    return {
+      batchId: response.batchId,
+      results: response.results.map<Result>(result => {
+        return {
+          id: result.resultId,
+          modality: result.modality,
+          orderId: result.requisitionId ?? result.orderId,
+          results: result.runSummaries.map(runSummary => ({
+            code: runSummary.code,
+            name: runSummary.name,
+            runDate: runSummary.runDate,
+            sampleType: runSummary.sampleType,
+            items: [],
+            notes: ''
+          })),
+          status: result.status
+        }
+      })
     }
   }
 

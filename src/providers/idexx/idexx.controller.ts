@@ -96,13 +96,15 @@ export class IdexxController implements ProviderIntegration {
     return await this.idexxService.getOrderResult(payload, metadata)
   }
 
-  @MessagePattern(`${Provider.Idexx}.${Resource.Orders}.${Operation.ResultsBatch}`)
+  @MessagePattern(
+    `${Provider.Idexx}.${Resource.Orders}.${Operation.ResultsBatch}`
+  )
   async getBatchResults (msg: ApiEvent<IdexxMessageData>): Promise<Result[]> {
     const { payload, ...metadata } = msg.data
 
     this.logger.log(`Sending getBatchResults() request to '${Provider.Idexx}'`)
 
-    return await this.idexxService.getBatchResults(payload, metadata)
+    return (await this.idexxService.getBatchResults(payload, metadata)).results
   }
 
   @MessagePattern(`${Provider.Idexx}.${Resource.Services}.${Operation.List}`)
