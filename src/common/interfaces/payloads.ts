@@ -6,6 +6,7 @@ export interface CreateOrderPayload {
   notes: string
   tests: Test[]
   veterinarian: Client
+  devices: Device[]
   technician: string
   editable: boolean
 }
@@ -32,6 +33,10 @@ export interface Patient {
   breed: string
   weight: number
   weightUnits: string
+}
+
+export interface Device {
+  serialNumber: string
 }
 
 export interface Test {

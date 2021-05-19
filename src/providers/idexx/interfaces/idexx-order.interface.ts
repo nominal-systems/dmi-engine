@@ -1,3 +1,5 @@
+import { Device } from '../../../common/interfaces/payloads'
+
 export interface IdexxOrder {
   diagnosticImagingLocationId?: string
   editable: boolean
@@ -13,6 +15,7 @@ export interface IdexxOrder {
   tests?: string[]
   uiURL?: string
   veterinarian?: string
+  ivls: Device[]
 }
 
 export enum IdexxOrderStatus {

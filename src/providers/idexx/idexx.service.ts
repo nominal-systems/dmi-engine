@@ -87,7 +87,8 @@ export class IdexxService {
       client,
       tests,
       veterinarian,
-      technician
+      technician,
+      devices
     } = payload
 
     const data: Partial<IdexxOrder> = {
@@ -97,6 +98,7 @@ export class IdexxService {
       technician,
       veterinarian: getFullName(veterinarian.firstName, veterinarian.lastName),
       petOwnerBilling: false,
+      ivls: devices,
       patients: [
         {
           name: getFullName(patient.firstName, patient.lastName),
