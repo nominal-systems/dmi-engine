@@ -98,7 +98,7 @@ export class IdexxService {
       technician,
       veterinarian: getFullName(veterinarian.firstName, veterinarian.lastName),
       petOwnerBilling: false,
-      ivls: devices,
+      ivls: devices?.map(serialNumber => ({ serialNumber })),
       patients: [
         {
           name: getFullName(patient.firstName, patient.lastName),
