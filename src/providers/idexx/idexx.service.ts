@@ -1,15 +1,21 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common'
 import { RpcException } from '@nestjs/microservices'
-import { CreateOrderPayload, IdPayload } from '../../common/interfaces/payloads'
+import {
+  CreateOrderPayload,
+  IdPayload,
+  OrderTestPayload
+} from '../../common/interfaces/payloads'
 import {
   Breed,
   Gender,
   Order,
+  Result,
   Service,
   Species
 } from '../../common/interfaces/provider-service'
 import { ReferenceDataResponse } from '../../common/interfaces/reference-data-response'
 import { getFullName } from '../../common/utils/get-full-name.util'
+import { NonNullableOptional } from '../../common/utils/object.utils'
 import {
   PIMS_ID_HEADER_NAME,
   PIMS_VERSION_HEADER_NAME
@@ -19,11 +25,17 @@ import {
   IdexxOrder,
   IdexxWeightUnits
 } from './interfaces/idexx-order.interface'
+import { IdexxResultConfirmPayload } from './interfaces/idexx-payloads.interface'
 import {
   IdexxBreed,
   IdexxRefDataResponse,
   IdexxTest
 } from './interfaces/idexx-reference-data.interface'
+import {
+  IdexxLatestResults,
+  IdexxSearchResultResponse
+} from './interfaces/idexx-results.interface'
+import { BatchResultsResponse } from '../../common/interfaces/responses.interface'
 
 @Injectable()
 export class IdexxService {
@@ -75,7 +87,8 @@ export class IdexxService {
       client,
       tests,
       veterinarian,
-      technician
+      technician,
+      devices
     } = payload
 
     const data: Partial<IdexxOrder> = {
@@ -85,6 +98,7 @@ export class IdexxService {
       technician,
       veterinarian: getFullName(veterinarian.firstName, veterinarian.lastName),
       petOwnerBilling: false,
+      ivls: devices?.map(serialNumber => ({ serialNumber })),
       patients: [
         {
           name: getFullName(patient.firstName, patient.lastName),
@@ -101,7 +115,7 @@ export class IdexxService {
       ]
     }
 
-    const response = await this.makePostRequest<NonNullable<IdexxOrder>>(
+    const response = await this.makePostRequest<IdexxOrder>(
       {
         url,
         username,
@@ -135,6 +149,90 @@ export class IdexxService {
       password,
       integrationOptions
     })
+  }
+
+  async cancelOrderTest (
+    payload: OrderTestPayload,
+    metadata: IdexxMessageData
+  ) {
+    throw new RpcException('Method not yet implemented')
+  }
+
+  async getOrderResult (
+    payload: IdPayload,
+    metadata: IdexxMessageData
+  ): Promise<Result> {
+    const {
+      providerConfiguration: { username, password, resultBaseUrl },
+      integrationOptions
+    } = metadata
+
+    const url = `${resultBaseUrl}/api/v3/results/search?requisitionId=${payload.id}`
+
+    const response = await this.makeGetRequest<IdexxSearchResultResponse>({
+      url,
+      username,
+      password,
+      integrationOptions
+    })
+
+    const result = response.results[0]
+
+    return {
+      id: result.resultId,
+      modality: result.modality,
+      orderId: result.requisitionId ?? result.orderId,
+      results: result.runSummaries.map(runSummary => ({
+        code: runSummary.code,
+        name: runSummary.name,
+        runDate: runSummary.runDate,
+        sampleType: runSummary.sampleType,
+        items: [],
+        notes: ''
+      })),
+      status: result.status
+    }
+  }
+
+  async getBatchResults (
+    payload: any,
+    metadata: IdexxMessageData
+  ): Promise<BatchResultsResponse> {
+    const {
+      providerConfiguration: { username, password, resultBaseUrl },
+      integrationOptions
+    } = metadata
+
+    const url = `${resultBaseUrl}/api/v3/results/latest`
+
+    const response = await this.makeGetRequest<
+      NonNullableOptional<IdexxLatestResults>
+    >({
+      url,
+      username,
+      password,
+      integrationOptions
+    })
+
+    return {
+      batchId: response.batchId,
+      results: response.results.map<Result>(result => {
+        return {
+          id: result.resultId,
+          modality: result.modality,
+          orderId: result.requisitionId ?? result.orderId,
+          results: result.runSummaries.map(runSummary => ({
+            code: runSummary.code,
+            name: runSummary.name,
+            runDate: runSummary.runDate,
+            sampleType: runSummary.sampleType,
+            items: [],
+            notes: ''
+          })),
+          status: result.status
+        }
+      })
+    }
   }
 
   async getBreeds (
@@ -260,6 +358,52 @@ export class IdexxService {
         type: item.inHouse ? 'IN_HOUSE' : 'PAID'
       })),
       hash: version
+    }
+  }
+
+  async resultsConfirm (
+    payload: IdexxResultConfirmPayload,
+    metadata: IdexxMessageData
+  ): Promise<BatchResultsResponse> {
+    const {
+      providerConfiguration: { username, password, resultBaseUrl },
+      integrationOptions
+    } = metadata
+
+    const { batchId } = payload
+
+    const url = `${resultBaseUrl}/api/v3/results/latest/confirm/${batchId}`
+
+    const response = await this.makePostRequest<
+      NonNullableOptional<IdexxLatestResults>
+    >(
+      {
+        url,
+        username,
+        password,
+        integrationOptions
+      },
+      null
+    )
+
+    return {
+      batchId: response.batchId,
+      results: response.results.map<Result>(result => {
+        return {
+          id: result.resultId,
+          modality: result.modality,
+          orderId: result.requisitionId ?? result.orderId,
+          results: result.runSummaries.map(runSummary => ({
+            code: runSummary.code,
+            name: runSummary.name,
+            runDate: runSummary.runDate,
+            sampleType: runSummary.sampleType,
+            items: [],
+            notes: ''
+          })),
+          status: result.status
+        }
+      })
     }
   }
 

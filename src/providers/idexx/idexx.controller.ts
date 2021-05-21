@@ -1,3 +1,4 @@
+import { InjectQueue } from '@nestjs/bull'
 import {
   Controller,
   Logger,
@@ -5,18 +6,24 @@ import {
   UsePipes,
   ValidationPipe
 } from '@nestjs/common'
-import { MessagePattern } from '@nestjs/microservices'
+import { ConfigService } from '@nestjs/config'
+import { EventPattern, MessagePattern } from '@nestjs/microservices'
+import { Queue } from 'bull'
 import { ApiEvent } from '../../common/events/api-event'
 import { ExceptionFilter } from '../../common/filters/exception-filter'
 import {
+  INewIntegrationJobMetadata,
   Operation,
   Provider,
+  ProviderIntegration,
   Resource
 } from '../../common/interfaces/provider-integration'
 import {
   Breed,
   Gender,
+  IMetadata,
   Order,
+  Result,
   Service,
   Species
 } from '../../common/interfaces/provider-service'
@@ -32,10 +39,15 @@ import { IdexxMessageData } from './interfaces/idexx-message-data.interface'
   })
 )
 @UseFilters(ExceptionFilter)
-export class IdexxController {
+export class IdexxController implements ProviderIntegration {
   private readonly logger = new Logger(IdexxController.name)
 
-  constructor (private readonly idexxService: IdexxService) {}
+  constructor (
+    private readonly configService: ConfigService,
+    private readonly idexxService: IdexxService,
+    @InjectQueue(`${Provider.Idexx}.results`)
+    private readonly resultsQueue: Queue
+  ) {}
 
   @MessagePattern(`${Provider.Idexx}.${Resource.Orders}.${Operation.Get}`)
   async getOrder (msg: ApiEvent<IdexxMessageData>): Promise<Order> {
@@ -62,6 +74,37 @@ export class IdexxController {
     this.logger.log(`Sending cancelOrder() request to '${Provider.Idexx}'`)
 
     return await this.idexxService.cancelOrder(payload, metadata)
+  }
+
+  @MessagePattern(
+    `${Provider.Idexx}.${Resource.Orders}.${Operation.TestsCancel}`
+  )
+  async cancelOrderTest (msg: ApiEvent<IdexxMessageData>): Promise<void> {
+    const { payload, ...metadata } = msg.data
+
+    this.logger.log(`Sending cancelOrderTest() request to '${Provider.Idexx}'`)
+
+    return await this.idexxService.cancelOrderTest(payload, metadata)
+  }
+
+  @MessagePattern(`${Provider.Idexx}.${Resource.Orders}.${Operation.Results}`)
+  async getOrderResult (msg: ApiEvent<IdexxMessageData>): Promise<Result> {
+    const { payload, ...metadata } = msg.data
+
+    this.logger.log(`Sending getOrderResult() request to '${Provider.Idexx}'`)
+
+    return await this.idexxService.getOrderResult(payload, metadata)
+  }
+
+  @MessagePattern(
+    `${Provider.Idexx}.${Resource.Orders}.${Operation.ResultsBatch}`
+  )
+  async getBatchResults (msg: ApiEvent<IdexxMessageData>): Promise<Result[]> {
+    const { payload, ...metadata } = msg.data
+
+    this.logger.log(`Sending getBatchResults() request to '${Provider.Idexx}'`)
+
+    return (await this.idexxService.getBatchResults(payload, metadata)).results
   }
 
   @MessagePattern(`${Provider.Idexx}.${Resource.Services}.${Operation.List}`)
@@ -106,5 +149,15 @@ export class IdexxController {
     this.logger.log(`Sending getSpecies() request to '${Provider.Idexx}'`)
 
     return await this.idexxService.getSpecies(payload, metadata)
+  }
+
+  @EventPattern(`${Provider.Idexx}.${Resource.Integration}.${Operation.Create}`)
+  async handleNewIntegration (jobData: INewIntegrationJobMetadata<IMetadata>) {
+    const jobId = `${Provider.Idexx}.${jobData.data.payload.integrationId}`
+
+    await this.resultsQueue.add(jobData, {
+      ...this.configService.get('jobs.results'),
+      jobId
+    })
   }
 }

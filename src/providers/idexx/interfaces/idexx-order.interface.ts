@@ -13,6 +13,7 @@ export interface IdexxOrder {
   tests?: string[]
   uiURL?: string
   veterinarian?: string
+  ivls: IvlsDevice[]
 }
 
 export enum IdexxOrderStatus {
@@ -70,4 +71,8 @@ export enum IdexxWeightUnits {
   KG = 'KILOGRAMS',
   LB = 'POUNDS',
   OZ = 'OUNCES'
+}
+
+export interface IvlsDevice {
+  serialNumber: string
 }
