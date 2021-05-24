@@ -16,7 +16,8 @@ import { ReferenceDataResponse } from './reference-data-response'
 export enum Provider {
   Demo = 'demo',
   Zoetis = 'zoetis-v1',
-  Idexx = 'idexx'
+  Idexx = 'idexx',
+  Antech = 'antech'
 }
 
 export enum Resource {

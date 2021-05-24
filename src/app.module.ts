@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import configuration from './config/configuration'
+import { AntechModule } from './providers/antech/antech.module'
 import { DemoModule } from './providers/demo/demo.module'
 import { IdexxModule } from './providers/idexx/idexx.module'
 import { ZoetisModule } from './providers/zoetis/zoetis.module'
@@ -27,7 +28,8 @@ import { ZoetisModule } from './providers/zoetis/zoetis.module'
     }),
     DemoModule,
     ZoetisModule,
-    IdexxModule
+    IdexxModule,
+    AntechModule
   ],
   controllers: [AppController],
   providers: [AppService]
