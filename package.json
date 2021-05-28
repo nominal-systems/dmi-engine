@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@line-studio/dmi-engine-antech-integration": "^0.0.2",
     "@line-studio/dmi-engine-demo-provider": "^0.0.2",
     "@line-studio/dmi-engine-idexx-integration": "^0.0.5",
     "@nestjs/bull": "^0.3.1",
