@@ -1,13 +1,13 @@
 import { AntechModule } from '@line-studio/dmi-engine-antech-integration'
 import { DemoModule } from '@line-studio/dmi-engine-demo-provider'
 import { IdexxModule } from '@line-studio/dmi-engine-idexx-integration'
+import { ZoetisModule } from '@line-studio/dmi-engine-zoetis-integration'
 import { BullModule } from '@nestjs/bull'
 import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import configuration from './config/configuration'
-import { ZoetisModule } from './providers/zoetis/zoetis.module'
 
 @Module({
   imports: [
