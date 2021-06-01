@@ -8,7 +8,12 @@ Diagnostic Modality Integration Engine built using [Nest](https://github.com/nes
 
 ## Installation
 
+In order to be able to install `@line-studio` scoped packages, you will need to generate a GitHub Personal Access Token (PAT) with at least the `read:packages` scope. More info on creating PATs on the [GitHub Docs](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+
+In order to authenticate with the GitHub Package Registry, export an environment variable `GHP_TOKEN` with the value of the PAT and run
+
 ```bash
+$ export GHP_TOKEN=<GitHub_PAT>
 $ npm install
 ```
 
@@ -57,9 +62,11 @@ $ npm run test:cov
 
 ## Building and pushing the Docker image to Amazon ECR
 
-Build the Docker image
+Build the Docker image (pass the `GHP_TOKEN` build argument with GitHub's PAT)
 ```bash
-docker build -t diagnostic-modality-integration-engine .
+docker build \
+  --build-arg GHP_TOKEN=<GitHub_PAT> \
+  -t diagnostic-modality-integration-engine .
 ```
 
 Tag the built image with `DockerTag` so you can push it to this repository
@@ -76,6 +83,48 @@ Push the image to the AWS ECR repository:
 ```bash
 docker push ${AWSAccountId}.dkr.ecr.us-east-2.amazonaws.com/diagnostic-modality-integration-engine:${DockerTag}
 ```
+
+## Adding new provider integrations
+In order to add a new provider integration, the specific integration package must be added as an application's dependency and the provider Nest module imported to the main application module.
+
+For example, to add IDEXX integration module, first declare the package dependency in `package.json`:
+
+````
+"dependencies": {
+  ...  
+  "@line-studio/dmi-engine-idexx-integration": "^0.0.5",
+  ...
+}
+````
+
+Import the module in `src/app.module.ts`:
+````
+import { IdexxModule } from '@line-studio/dmi-engine-idexx-integration'
+````
+
+and add it as an import of the main application's module:
+````
+@Module({
+  imports: [
+    ...
+    DemoModule,
+    IdexxModule,
+    ...
+  ],
+  controllers: [AppController],
+  providers: [AppService]
+})
+````
+
+### Supported provider integrations
+
+The following provider integration modules are supported:
+
+| Provider | Package/Repository |
+| --- | --- |
+| Antech | [@line-studio/dmi-engine-antech-integration](https://github.com/line-studio/dmi-engine-antech-integration) | 
+| IDEXX | [@line-studio/dmi-engine-idexx-integration](https://github.com/line-studio/dmi-engine-idexx-integration) |
+| Zoetis | [@/line-studio/dmi-engine-zoetis-integration](https://github.com/line-studio/dmi-engine-zoetis-integration) |
 
 ## Events
 
