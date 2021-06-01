@@ -124,7 +124,7 @@ The following provider integration modules are supported:
 | --- | --- |
 | Antech | [@line-studio/dmi-engine-antech-integration](https://github.com/line-studio/dmi-engine-antech-integration) | 
 | IDEXX | [@line-studio/dmi-engine-idexx-integration](https://github.com/line-studio/dmi-engine-idexx-integration) |
-| Zoetis | [@/line-studio/dmi-engine-zoetis-integration](https://github.com/line-studio/dmi-engine-zoetis-integration) |
+| Zoetis | [@line-studio/dmi-engine-zoetis-integration](https://github.com/line-studio/dmi-engine-zoetis-integration) |
 
 ## Events
 
