@@ -38,6 +38,7 @@ jobs:
         registry: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-2.amazonaws.com
         repo: ${{ env.DOCKER_IMAGE_NAME }}
         tags: ${{ github.sha }}
+        build_args: GHP_TOKEN=${{ secrets.GHP_TOKEN }}
     - name: Download task definition
       run: |
         aws ecs describe-task-definition \
