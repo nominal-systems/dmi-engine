@@ -85,16 +85,12 @@ docker push ${AWSAccountId}.dkr.ecr.us-east-2.amazonaws.com/diagnostic-modality-
 ```
 
 ## Adding new provider integrations
-In order to add a new provider integration, the specific integration package must be added as an application's dependency and the provider Nest module imported to the main application module.
+In order to add a new provider integration, the specific integration package must be installed, and the provider Nest module imported to the main application module.
 
-For example, to add IDEXX integration module, first declare the package dependency in `package.json`:
+For example, to add IDEXX integration, install the integration module:
 
 ````
-"dependencies": {
-  ...  
-  "@line-studio/dmi-engine-idexx-integration": "^0.0.5",
-  ...
-}
+npm install @line-studio/dmi-engine-idexx-integration
 ````
 
 Import the module in `src/app.module.ts`:
