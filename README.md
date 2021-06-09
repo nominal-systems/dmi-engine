@@ -1,6 +1,6 @@
 # Diagnostic Modality Integration Engine
 
-[![Build and Deploy - Staging](https://github.com/line-studio/diagnostic-modality-integration-engine/actions/workflows/build-deploy-staging.yml/badge.svg?branch=main)](https://github.com/line-studio/diagnostic-modality-integration-engine/actions/workflows/build-deploy-staging.yml)
+[![Build and Deploy - Staging](https://github.com/nominal-systems/diagnostic-modality-integration-engine/actions/workflows/build-deploy-staging.yml/badge.svg?branch=main)](https://github.com/nominal-systems/diagnostic-modality-integration-engine/actions/workflows/build-deploy-staging.yml)
 
 ## Description
 
@@ -8,7 +8,7 @@ Diagnostic Modality Integration Engine built using [Nest](https://github.com/nes
 
 ## Installation
 
-In order to be able to install `@line-studio` scoped packages, you will need to generate a GitHub Personal Access Token (PAT) with at least the `read:packages` scope. More info on creating PATs on the [GitHub Docs](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+In order to be able to install `@nominal-systems` scoped packages, you will need to generate a GitHub Personal Access Token (PAT) with at least the `read:packages` scope. More info on creating PATs on the [GitHub Docs](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
 In order to authenticate with the GitHub Package Registry, export an environment variable `GHP_TOKEN` with the value of the PAT and run
 
@@ -90,12 +90,12 @@ In order to add a new provider integration, the specific integration package mus
 For example, to add IDEXX integration, install the integration module:
 
 ````
-npm install @line-studio/dmi-engine-idexx-integration
+npm install @nominal-systems/dmi-engine-idexx-integration
 ````
 
 Import the module in `src/app.module.ts`:
 ````
-import { IdexxModule } from '@line-studio/dmi-engine-idexx-integration'
+import { IdexxModule } from '@nominal-systems/dmi-engine-idexx-integration'
 ````
 
 and add it as an import of the main application's module:
@@ -118,9 +118,9 @@ The following provider integration modules are supported:
 
 | Provider | Package/Repository |
 | --- | --- |
-| Antech | [@line-studio/dmi-engine-antech-integration](https://github.com/line-studio/dmi-engine-antech-integration) | 
-| IDEXX | [@line-studio/dmi-engine-idexx-integration](https://github.com/line-studio/dmi-engine-idexx-integration) |
-| Zoetis | [@line-studio/dmi-engine-zoetis-integration](https://github.com/line-studio/dmi-engine-zoetis-integration) |
+| Antech | [@nominal-systems/dmi-engine-antech-integration](https://github.com/nominal-systems/dmi-engine-antech-integration) | 
+| IDEXX | [@nominal-systems/dmi-engine-idexx-integration](https://github.com/nominal-systems/dmi-engine-idexx-integration) |
+| Zoetis | [@nominal-systems/dmi-engine-zoetis-integration](https://github.com/nominal-systems/dmi-engine-zoetis-integration) |
 
 ## Events
 
