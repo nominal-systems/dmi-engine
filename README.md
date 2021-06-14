@@ -23,6 +23,15 @@ $ npm install
 2. Change parameters in the `docker-compose*.yaml` files as you see fit, and make sure they match with the ones specified in the `.env` file.
 3. Choose one of the methods below
 
+### Kubernetes (Tilt)
+See [DMI Charts](https://github.com/nominal-systems/dmi-charts) repository for more information:
+```bash
+$ cd dmi-charts
+$ tilt up
+```
+
+When using this setup, you can duplicate `src/app.module.ts` to `src/app.module.full.ts` and make changes to that file (e.g. if you have access to all the provider integrations) and Tilt will take care of setting up that as the `app.module.ts`.
+
 ### Docker
 ```bash
 # Development

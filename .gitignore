@@ -37,3 +37,9 @@ lerna-debug.log*
 # Application
 .env
 .nvmrc
+
+# Custom
+.yalc
+yalc.lock
+tilt-package.json
+src/app.module.full.ts

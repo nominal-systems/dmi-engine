@@ -1,0 +1,31 @@
+FROM node:14-alpine as base
+WORKDIR /app
+ARG GHP_TOKEN
+COPY tilt-package.json package.json
+COPY .npmrc .
+COPY .yalc .yalc
+RUN npm install
+COPY . .
+COPY tilt-package.json package.json
+RUN rm .npmrc && \
+    mv src/app.module.full.ts src/app.module.ts
+
+FROM base as development
+ENV NODE_ENV=development
+ENV GHP_TOKEN=${GHP_TOKEN}
+VOLUME [ "/app" ]
+EXPOSE 3000
+CMD ["npm", "run", "start:dev"]
+
+FROM base as build
+ENV NODE_ENV=production
+RUN npm run build
+
+FROM build as production
+ENV NODE_ENV=production
+COPY --from=build /app/dist .
+COPY --from=build /app/node_modules .
+COPY --from=build /app/package.json .
+RUN npm prune --production
+EXPOSE 3000
+CMD ["npm", "run", "start:prod"]
