@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import configuration from './config/configuration'
+import { APP_FILTER } from '@nestjs/core'
+import { CustomRpcExceptionFilter } from './filters/rpc-exception.filter'
 
 @Module({
   imports: [
@@ -26,6 +28,9 @@ import configuration from './config/configuration'
     DemoModule
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [
+    AppService,
+    { provide: APP_FILTER, useClass: CustomRpcExceptionFilter }
+  ]
 })
 export class AppModule {}

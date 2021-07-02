@@ -11,12 +11,15 @@ async function bootstrap () {
   const configService = app.get<ConfigService<AppConfig>>(ConfigService)
   const PORT = configService.get<number>('port', 3000)
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.MQTT,
-    options: {
-      ...configService.get('mqtt')
-    }
-  })
+  app.connectMicroservice<MicroserviceOptions>(
+    {
+      transport: Transport.MQTT,
+      options: {
+        ...configService.get('mqtt')
+      }
+    },
+    { inheritAppConfig: true }
+  )
 
   await app.startAllMicroservicesAsync()
   await app.listen(PORT)
