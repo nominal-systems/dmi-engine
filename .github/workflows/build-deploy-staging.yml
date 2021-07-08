@@ -37,8 +37,15 @@ jobs:
       with:
         registry: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-2.amazonaws.com
         repo: ${{ env.DOCKER_IMAGE_NAME }}
-        tags: ${{ github.sha }}
+        tags: latest,${{ github.sha }}
         build_args: GHP_TOKEN=${{ secrets.GHP_TOKEN }}
+    - name: Dispatch API update event
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        repository: nominal-systems/dmi
+        event-type: engine-updated
+        client-payload: '{ "image": "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-2.amazonaws.com/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}" }'
     - name: Download task definition
       run: |
         aws ecs describe-task-definition \
