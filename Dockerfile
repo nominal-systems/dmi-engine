@@ -27,6 +27,5 @@ ENV NODE_ENV=production
 COPY --from=build /app/dist .
 COPY --from=build /app/node_modules .
 COPY --from=build /app/package.json .
-RUN npm prune --production
 EXPOSE 3000
 CMD ["npm", "run", "start:prod"]
