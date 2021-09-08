@@ -2,9 +2,3 @@
 **/dist
 .env
 docker-compose*
-
-# Tilt / K8s 
-.yalc
-yalc.lock
-*tilt*
-src/app.module.full.ts
