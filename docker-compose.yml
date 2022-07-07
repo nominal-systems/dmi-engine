@@ -4,20 +4,27 @@ services:
   engine:
     build:
       context: .
-      target: development
+      target: production
+      args:
+        GHP_TOKEN: ${GHP_TOKEN}
     ports:
       - '3000:3000'
     depends_on:
       - activemq
-    env_file: .env
+      - redis
     environment:
+      PORT: 3000
       MQTT_HOST: activemq
       MQTT_PORT: 1883
-    volumes:
-      - ./src:/app/src
-    command: ['/wait-for', 'activemq:1883', '--', 'npm', 'run', 'start:prod']
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    command: ['./scripts/wait-for-all.sh', 'npm run start:prod']
   activemq:
     image: rmohr/activemq
     ports:
       - '8161:8161'
       - '1883:1883'
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
