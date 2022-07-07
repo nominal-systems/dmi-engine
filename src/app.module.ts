@@ -9,13 +9,18 @@ import { CustomRpcExceptionFilter } from './filters/rpc-exception.filter'
 import { IdexxModule } from '@nominal-systems/dmi-engine-idexx-integration'
 import { AntechModule } from '@nominal-systems/dmi-engine-antech-integration'
 import { ZoetisModule } from '@nominal-systems/dmi-engine-zoetis-integration'
-import { DemoModule } from '@nominal-systems/dmi-engine-demo-provider';
+import { DemoModule } from '@nominal-systems/dmi-engine-demo-provider'
+import { WinstonModule } from 'nest-winston'
+import { consoleTransport, fileTransport } from './config/winstonconfig'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration]
+    }),
+    WinstonModule.forRoot({
+      transports: [consoleTransport, fileTransport]
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],

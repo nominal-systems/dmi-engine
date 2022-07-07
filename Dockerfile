@@ -2,14 +2,21 @@
 FROM node:14-alpine as base
 WORKDIR /app
 ARG GHP_TOKEN
-COPY package.json .
-COPY .npmrc .
-RUN apk add --no-cache --virtual build-base
-RUN npm install -g node-gyp && npm install
-RUN apk del build-base
-RUN wget https://github.com/eficode/wait-for/releases/latest/download/wait-for -O /wait-for
-RUN chmod +x /wait-for
+
+COPY package*.json .npmrc ./
+
+RUN apk add --no-cache --virtual build-base &&\
+    npm install -g npm node-gyp &&\
+    npm install &&\
+    apk del build-base &&\
+    npm un -g node-gyp &&\
+    rm -rf /var/cache/apk/*
+
+RUN wget https://github.com/eficode/wait-for/releases/latest/download/wait-for -O /wait-for &&\
+    chmod +x /wait-for
+
 COPY . .
+
 RUN chmod +x ./scripts/wait-for-all.sh &&\
     rm .npmrc
 
