@@ -28,7 +28,6 @@
     "@nestjs/microservices": "^7.6.13",
     "@nestjs/platform-express": "^7.6.13",
     "@nominal-systems/dmi-engine-antech-integration": "^0.0.5",
-    "@nominal-systems/dmi-engine-demo-provider": "^0.0.9",
     "@nominal-systems/dmi-engine-idexx-integration": "^0.0.8",
     "@nominal-systems/dmi-engine-zoetis-integration": "^0.0.8",
     "bull": "^3.21.1",
