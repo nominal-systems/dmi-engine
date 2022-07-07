@@ -9,6 +9,7 @@ import { CustomRpcExceptionFilter } from './filters/rpc-exception.filter'
 import { IdexxModule } from '@nominal-systems/dmi-engine-idexx-integration'
 import { AntechModule } from '@nominal-systems/dmi-engine-antech-integration'
 import { ZoetisModule } from '@nominal-systems/dmi-engine-zoetis-integration'
+import { DemoModule } from '@nominal-systems/dmi-engine-demo-provider';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ZoetisModule } from '@nominal-systems/dmi-engine-zoetis-integration'
       }),
       inject: [ConfigService]
     }),
+    DemoModule,
     AntechModule,
     IdexxModule,
     ZoetisModule
