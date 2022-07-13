@@ -6,12 +6,9 @@ import { AppService } from './app.service'
 import configuration from './config/configuration'
 import { APP_FILTER } from '@nestjs/core'
 import { CustomRpcExceptionFilter } from './filters/rpc-exception.filter'
-import { IdexxModule } from '@nominal-systems/dmi-engine-idexx-integration'
-import { AntechModule } from '@nominal-systems/dmi-engine-antech-integration'
-import { ZoetisModule } from '@nominal-systems/dmi-engine-zoetis-integration'
-import { DemoModule } from '@nominal-systems/dmi-engine-demo-provider'
 import { WinstonModule } from 'nest-winston'
 import { consoleTransport, fileTransport } from './config/winstonconfig'
+import { DemoModule } from '@nominal-systems/dmi-engine-demo-provider'
 
 @Module({
   imports: [
@@ -33,10 +30,7 @@ import { consoleTransport, fileTransport } from './config/winstonconfig'
       }),
       inject: [ConfigService]
     }),
-    DemoModule,
-    AntechModule,
-    IdexxModule,
-    ZoetisModule
+    DemoModule
   ],
   controllers: [AppController],
   providers: [
