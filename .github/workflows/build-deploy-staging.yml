@@ -1,71 +1,29 @@
-name: Build and Deploy to Staging
+name: Build and push to ACR
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-  
-env: 
-  DOCKER_IMAGE_NAME: diagnostic-modality-integration-engine
-  AWS_ACCOUNT_ID: 216821345641
-  ECS_TASK_DEFINITION: line-dev-dmi-diagnostic-modality-integration-engine-task-definition
-  ECS_SERVICE: line-dev-diagnostic-modality-integration-engine-service
-  ECS_CLUSTER: line-dev-dmi-cluster
+
+env:
+  REGISTRY_NAME: nominaldevacr
+  APP_NAME: dmi-engine
 
 jobs:
-  build-push-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - name: Code checkout
-      uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: |
-        docker build . \
-        --file Dockerfile \
-        --target production \
-        --build-arg GHP_TOKEN=${{ secrets.GHP_TOKEN }} \
-        --tag ${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-2
-    - name: Push Docker image to Amazon ECR
-      uses: appleboy/docker-ecr-action@v0.0.3
-      with:
-        registry: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-2.amazonaws.com
-        repo: ${{ env.DOCKER_IMAGE_NAME }}
-        tags: latest,${{ github.sha }}
-        build_args: GHP_TOKEN=${{ secrets.GHP_TOKEN }}
-    - name: Dispatch engine-updated event to nominal-systems/dmi
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: nominal-systems/dmi
-        event-type: engine-updated
-        client-payload: '{ "image": "${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-2.amazonaws.com/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}" }'
-    - name: Download task definition
-      if: ${{ false }}
-      run: |
-        aws ecs describe-task-definition \
-        --task-definition ${{ env.ECS_TASK_DEFINITION }} \
-        --query taskDefinition \
-        > task-definition.json
-    - name: Fill in the new image ID in the Amazon ECS task definition
-      if: ${{ false }}
-      id: render-task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definition.json
-        image: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-2.amazonaws.com/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }}
-        container-name: ${{ env.DOCKER_IMAGE_NAME }}
-    - name: Update ECS Task definition and deploy
-      if: ${{ false }}
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.render-task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        force-new-deployment: true
+      - uses: actions/checkout@main
+
+      # Connect to Azure Container Registry (ACR)
+      - uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.REGISTRY_NAME }}.azurecr.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      # Container build and push to a Azure Container Registry (ACR)
+      - run: |
+          docker build . -t ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }} --target production --build-arg GHP_TOKEN=${{ secrets.GHP_TOKEN }}
+          docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}

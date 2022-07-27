@@ -69,6 +69,18 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Configure Secrets
+
+The GitHub Actions expect the following secrets to be configured in the repository:
+- `GHP_TOKEN` — The name of the GitHub Personal Access Token (PAT) to be able to download packages from the private NPM repository.
+- `REGISTRY_USERNAME` — Username to authenticate with ACR
+- `REGISTRY_PASSWORD` — Password of the ACR user
+
+To obtain ACR credentials run:
+````
+az acr credential show --name=${REGISTRY_NAME}
+````
+
 ## Building and pushing the Docker image to Amazon ECR
 
 Build the Docker image (pass the `GHP_TOKEN` build argument with GitHub's PAT)
