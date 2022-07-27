@@ -8,7 +8,7 @@ import { APP_FILTER } from '@nestjs/core'
 import { CustomRpcExceptionFilter } from './filters/rpc-exception.filter'
 import { WinstonModule } from 'nest-winston'
 import { consoleTransport, fileTransport } from './config/winstonconfig'
-import { DemoModule } from '@nominal-systems/dmi-engine-demo-provider'
+import { DemoModule } from '@nominal-systems/dmi-engine-demo-provider-integration'
 
 @Module({
   imports: [
