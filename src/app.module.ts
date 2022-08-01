@@ -24,7 +24,8 @@ import { DemoModule } from '@nominal-systems/dmi-engine-demo-provider-integratio
       useFactory: async (configService: ConfigService) => ({
         redis: {
           host: configService.get('REDIS_HOST'),
-          port: configService.get('REDIS_PORT')
+          port: configService.get('REDIS_PORT'),
+          password: configService.get('REDIS_PASSWORD')
         },
         defaultJobOptions: { removeOnComplete: true }
       }),
