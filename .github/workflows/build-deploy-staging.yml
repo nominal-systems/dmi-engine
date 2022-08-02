@@ -1,4 +1,4 @@
-name: Build and push to ACR
+name: Deploy to Azure
 
 on:
   push:
@@ -13,17 +13,29 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    name: Build and push to ACR
     steps:
+      # Checkout code
       - uses: actions/checkout@main
-
-      # Connect to Azure Container Registry (ACR)
+        # Connect to Azure Container Registry (ACR)
       - uses: azure/docker-login@v1
         with:
           login-server: ${{ env.REGISTRY_NAME }}.azurecr.io
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-
-      # Container build and push to a Azure Container Registry (ACR)
+      # Build and push to ACR
       - run: |
           docker build . -t ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }} --target production --build-arg GHP_TOKEN=${{ secrets.GHP_TOKEN }}
           docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
+  dipatch-event:
+    runs-on: ubuntu-latest
+    name: Notify deploy workflow
+    needs: build
+    steps:
+      - name: Dispatch demo-provider-api-updated event to nominal-systems/dmi
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: nominal-systems/dmi
+          event-type: ${{ env.APP_NAME }}-updated
+          client-payload: '{ "image": "${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}" }'
