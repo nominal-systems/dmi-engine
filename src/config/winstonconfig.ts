@@ -6,7 +6,7 @@ export const consoleTransport = new winston.transports.Console({
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.ms(),
-    nestWinstonModuleUtilities.format.nestLike('dmi-api', { prettyPrint: true })
+    nestWinstonModuleUtilities.format.nestLike('dmi-engine', { prettyPrint: true })
   )
 })
 
@@ -16,6 +16,6 @@ export const fileTransport = new winston.transports.File({
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.ms(),
-    nestWinstonModuleUtilities.format.nestLike('dmi-api', { prettyPrint: true })
+    nestWinstonModuleUtilities.format.nestLike('dmi-engine', { prettyPrint: true })
   )
 })
