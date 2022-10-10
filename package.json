@@ -11,6 +11,8 @@
     "version": "git add -A src",
     "postversion": "git push --follow-tags",
     "build": "nest build",
+    "docker:build": "docker build -t nominal-systems/dmi-engine . --build-arg GHP_TOKEN=$GHP_TOKEN",
+    "postdocker:build": "docker tag nominal-systems/dmi-engine:latest nominal-systems/dmi-engine:$npm_package_version",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
