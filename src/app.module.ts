@@ -27,7 +27,10 @@ import { DemoModule } from '@nominal-systems/dmi-engine-demo-provider-integratio
           port: configService.get('REDIS_PORT'),
           password: configService.get('REDIS_PASSWORD')
         },
-        defaultJobOptions: { removeOnComplete: true }
+        defaultJobOptions: {
+          removeOnComplete: true,
+          removeOnFail: true
+        }
       }),
       inject: [ConfigService]
     }),

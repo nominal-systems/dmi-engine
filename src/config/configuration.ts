@@ -13,6 +13,13 @@ export default (): AppConfig => ({
     host: process.env.REDIS_HOST ?? 'localhost',
     port: Number(process.env.REDIS_PORT ?? 6379)
   },
+  queues: {
+    clean: {
+      failed: {
+        grace: 1000 * 60 * 60 * 24
+      }
+    }
+  },
   jobs: {
     results: {
       repeat: {

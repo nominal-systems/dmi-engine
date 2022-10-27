@@ -2,6 +2,13 @@ export interface AppConfig {
   port: number
   mqtt: MQTTConfig
   redis: RedisConfig
+  queues: {
+    clean: {
+      [key: string]: {
+        grace: number
+      }
+    }
+  }
   jobs: {
     [key: string]: {
       repeat: {
