@@ -9,13 +9,11 @@ export interface AppConfig {
       }
     }
   }
-  jobs: {
-    [key: string]: {
-      repeat: {
-        every: number
-      }
+  jobs: Record<string, {
+    repeat: {
+      every: number
     }
-  }
+  }>
 }
 
 export interface MQTTConfig {

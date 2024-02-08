@@ -1,4 +1,4 @@
-import { AppConfig } from './configuration.interface'
+import { type AppConfig } from './configuration.interface'
 
 export default (): AppConfig => ({
   port: Number(process.env.PORT ?? 3000),

@@ -1,13 +1,11 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { MicroserviceOptions, Transport } from '@nestjs/microservices'
+import { type MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { ConfigService } from '@nestjs/config'
-import { AppConfig } from './config/configuration.interface'
-import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston'
+import { type AppConfig } from './config/configuration.interface'
 
 async function bootstrap () {
   const app = await NestFactory.create(AppModule)
-  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER))
 
   const configService = app.get<ConfigService<AppConfig>>(ConfigService)
   const PORT = configService.get<number>('port', 3000)
@@ -22,7 +20,7 @@ async function bootstrap () {
     { inheritAppConfig: true }
   )
 
-  await app.startAllMicroservicesAsync()
+  await app.startAllMicroservices()
   await app.listen(PORT)
 }
 
