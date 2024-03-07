@@ -1,11 +1,10 @@
-import { BullModule } from '@nestjs/bull'
 import { Module } from '@nestjs/common'
-import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ConfigModule } from '@nestjs/config'
 import configuration from './config/configuration'
 import { APP_FILTER } from '@nestjs/core'
 import { CustomRpcExceptionFilter } from './filters/rpc-exception.filter'
-import { WinstonModule } from 'nest-winston'
-import { consoleTransport, fileTransport } from './config/winstonconfig'
+import { AntechV6Module } from '@nominal-systems/dmi-engine-antech-v6-integration'
+import { EngineController } from './engine/engine.controller'
 
 @Module({
   imports: [
@@ -13,31 +12,14 @@ import { consoleTransport, fileTransport } from './config/winstonconfig'
       isGlobal: true,
       load: [configuration]
     }),
-    WinstonModule.forRoot({
-      transports: [consoleTransport, fileTransport]
-    }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        redis: {
-          host: configService.get('REDIS_HOST'),
-          port: configService.get('REDIS_PORT'),
-          password: configService.get('REDIS_PASSWORD')
-        },
-        defaultJobOptions: {
-          removeOnComplete: true,
-          removeOnFail: true
-        }
-      }),
-      inject: [ConfigService]
-    })
+    AntechV6Module
   ],
   providers: [
     {
       provide: APP_FILTER,
       useClass: CustomRpcExceptionFilter
     }
-  ]
+  ],
+  controllers: [EngineController]
 })
-export class AppModule {
-}
+export class AppModule {}
