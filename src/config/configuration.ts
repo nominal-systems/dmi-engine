@@ -11,7 +11,8 @@ export default (): AppConfig => ({
   },
   redis: {
     host: process.env.REDIS_HOST ?? 'localhost',
-    port: Number(process.env.REDIS_PORT ?? 6379)
+    port: Number(process.env.REDIS_PORT ?? 6379),
+    password: process.env.REDIS_PASSWORD ?? ''
   },
   queues: {
     clean: {
@@ -21,15 +22,8 @@ export default (): AppConfig => ({
     }
   },
   jobs: {
-    results: {
-      repeat: {
-        every: 10000
-      }
-    },
-    orders: {
-      repeat: {
-        every: 10000
-      }
+    repeat: {
+      every: 1000 * 30
     }
   }
 })

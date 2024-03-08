@@ -1,19 +1,20 @@
+import { type CronRepeatOptions, type EveryRepeatOptions } from 'bull'
+
 export interface AppConfig {
   port: number
   mqtt: MQTTConfig
   redis: RedisConfig
   queues: {
-    clean: {
-      [key: string]: {
+    clean: Record<
+      string,
+      {
         grace: number
       }
-    }
+    >
   }
-  jobs: Record<string, {
-    repeat: {
-      every: number
-    }
-  }>
+  jobs: {
+    repeat: CronRepeatOptions | EveryRepeatOptions
+  }
 }
 
 export interface MQTTConfig {
@@ -27,4 +28,5 @@ export interface MQTTConfig {
 export interface RedisConfig {
   host: string
   port: number
+  password: string
 }
