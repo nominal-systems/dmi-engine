@@ -51,6 +51,11 @@ export class QueueService implements OnModuleInit {
     await this.logJobCounts()
   }
 
+  async updatePollingJobsForIntegration(providerId: string, data: IPayload<ExistingIntegrationPayload>): Promise<void> {
+    await this.stopPollingJobsForIntegration(providerId, data)
+    await this.startPollingJobsForIntegration(providerId, data)
+  }
+
   private async logJobCounts() {
     for (const provider of Object.keys(this.queues)) {
       for (const queue of this.queues[provider]) {

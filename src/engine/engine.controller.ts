@@ -43,6 +43,7 @@ export class EngineController implements ProviderIntegrationAdmin {
     @Payload() jobData: IExistingIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
   ): Promise<void> {
-    // TODO(gb): implement
+    const providerId = context.getTopic().split('/')[0]
+    await this.queueService.updatePollingJobsForIntegration(providerId, jobData.data)
   }
 }
