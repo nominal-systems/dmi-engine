@@ -2,6 +2,9 @@ name: Deploy to Azure
 
 on:
   workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
 
 env:
   REGISTRY_NAME: nominaldevacr
@@ -11,28 +14,40 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Build and push to ACR
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
     steps:
-      # Checkout code
       - uses: actions/checkout@main
-        # Connect to Azure Container Registry (ACR)
+      - name: Set Docker tag
+        id: tag
+        shell: bash
+        run: |
+          # Default GITHUB_SHA
+          tag="${GITHUB_SHA}"
+
+          # If ref is a tag, parse that
+          if [[ "${GITHUB_REF}" == refs/tags* ]]; then
+            tag=$(echo $GITHUB_REF | sed 's/refs\/tags\///g')
+          fi
+
+          echo "::set-output name=tag::$tag"
       - uses: azure/docker-login@v1
         with:
           login-server: ${{ env.REGISTRY_NAME }}.azurecr.io
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-      # Build and push to ACR
       - run: |
-          docker build . -t ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }} --target production --build-arg GHP_TOKEN=${{ secrets.GHP_TOKEN }}
-          docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
+          docker build . -t ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ steps.tag.outputs.tag }} --target production --build-arg GHP_TOKEN=${{ secrets.GHP_TOKEN }}
+          docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ steps.tag.outputs.tag }}
   dipatch-event:
     runs-on: ubuntu-latest
     name: Notify deploy workflow
     needs: build
     steps:
-      - name: Dispatch demo-provider-api-updated event to nominal-systems/dmi
+      - name: Dispatch dmi-engine-idexx-integration-updated event to nominal-systems/dmi
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: nominal-systems/dmi
           event-type: ${{ env.APP_NAME }}-updated
-          client-payload: '{ "image": "${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}" }'
+          client-payload: '{ "image": "${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ needs.build.outputs.tag }}" }'
