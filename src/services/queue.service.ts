@@ -14,16 +14,21 @@ export class QueueService implements OnModuleInit {
   private readonly logger = new Logger(QueueService.name)
   private readonly jobsConfig
   queues: ProviderQueues = {
-    'antech-v6': []
+    'antech-v6': [],
+    'wisdom-panel': []
   }
 
   constructor(
     private readonly configService: ConfigService,
     @InjectQueue('antech-v6.orders') private readonly antechV6OrdersQueue: Queue,
-    @InjectQueue('antech-v6.results') private readonly antechV6ResultsQueue: Queue
+    @InjectQueue('antech-v6.results') private readonly antechV6ResultsQueue: Queue,
+    @InjectQueue('wisdom-panel.orders') private readonly wisdomPanelOrdersQueue: Queue,
+    @InjectQueue('wisdom-panel.results') private readonly wisdomPanelResultsQueue: Queue
   ) {
     this.queues['antech-v6'].push(this.antechV6OrdersQueue)
     this.queues['antech-v6'].push(this.antechV6ResultsQueue)
+    this.queues['wisdom-panel'].push(this.wisdomPanelOrdersQueue)
+    this.queues['wisdom-panel'].push(this.wisdomPanelResultsQueue)
     this.jobsConfig = this.configService.get('jobs')
   }
 
