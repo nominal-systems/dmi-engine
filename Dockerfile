@@ -1,5 +1,5 @@
 ## STAGE: Base ##
-FROM node:14-alpine as base
+FROM node:20-alpine as base
 WORKDIR /app
 ARG GHP_TOKEN
 
