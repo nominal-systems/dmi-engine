@@ -43,3 +43,4 @@ lerna-debug.log*
 yalc.lock
 tilt-package.json
 src/app.module.full.ts
+http-requests
