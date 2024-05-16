@@ -34,7 +34,7 @@
     "@nestjs/microservices": "^10.3.2",
     "@nestjs/platform-express": "^10.3.2",
     "@nominal-systems/dmi-engine-common": "^1.1.1",
-    "@nominal-systems/dmi-engine-wisdom-panel-integration": "^0.2.9",
+    "@nominal-systems/dmi-engine-wisdom-panel-integration": "^0.2.10",
     "bull": "^4.12.2",
     "cache-manager": "^5.5.1",
     "class-transformer": "^0.5.1",
