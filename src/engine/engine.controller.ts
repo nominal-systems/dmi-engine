@@ -20,7 +20,8 @@ import { QueueService } from '../services/queue.service'
 export class EngineController implements ProviderIntegrationAdmin {
   constructor(private readonly queueService: QueueService) {}
 
-  @MessagePattern(`+/${Resource.Integration}/${Operation.Create}`)
+  // TODO(gb): use a wildcard to match all providers
+  @MessagePattern(`wisdom-panel/${Resource.Integration}/${Operation.Create}`)
   async handleNewIntegration(
     @Payload() jobData: INewIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
@@ -29,7 +30,8 @@ export class EngineController implements ProviderIntegrationAdmin {
     await this.queueService.startPollingJobsForIntegration(providerId, jobData.data)
   }
 
-  @MessagePattern(`+/${Resource.Integration}/${Operation.Remove}`)
+  // TODO(gb): use a wildcard to match all providers
+  @MessagePattern(`wisdom-panel/${Resource.Integration}/${Operation.Remove}`)
   async handleIntegrationDelete(
     @Payload() jobData: IExistingIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
@@ -38,7 +40,8 @@ export class EngineController implements ProviderIntegrationAdmin {
     await this.queueService.stopPollingJobsForIntegration(providerId, jobData.data)
   }
 
-  @MessagePattern(`+/${Resource.Integration}/${Operation.Update}`)
+  // TODO(gb): use a wildcard to match all providers
+  @MessagePattern(`wisdom-panel/${Resource.Integration}/${Operation.Update}`)
   async handleIntegrationUpdate(
     @Payload() jobData: IExistingIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
