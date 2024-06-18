@@ -49,4 +49,30 @@ export class EngineController implements ProviderIntegrationAdmin {
     const providerId = context.getTopic().split('/')[0]
     await this.queueService.updatePollingJobsForIntegration(providerId, jobData.data)
   }
+
+  // TODO(gb): remove this method once the wildcard is implemented
+  @MessagePattern(`antech-v6/${Resource.Integration}/${Operation.Create}`)
+  async handleNewIntegrationAntechV6(
+    @Payload() jobData: INewIntegrationJobMetadata<IMetadata>,
+    @Ctx() context: MqttContext
+  ): Promise<void> {
+    await this.handleNewIntegration(jobData, context)
+  }
+
+  // TODO(gb): remove this method once the wildcard is implemented
+  @MessagePattern(`antech-v6/${Resource.Integration}/${Operation.Remove}`)
+  async handleIntegrationDeleteAntechV6(
+    @Payload() jobData: IExistingIntegrationJobMetadata<IMetadata>,
+    @Ctx() context: MqttContext
+  ): Promise<void> {
+    await this.handleIntegrationDelete(jobData, context)
+  }
+
+  @MessagePattern(`antech-v6/${Resource.Integration}/${Operation.Update}`)
+  async handleIntegrationUpdateAntechV6(
+    @Payload() jobData: IExistingIntegrationJobMetadata<IMetadata>,
+    @Ctx() context: MqttContext
+  ): Promise<void> {
+    await this.handleIntegrationUpdate(jobData, context)
+  }
 }
