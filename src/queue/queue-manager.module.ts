@@ -10,12 +10,14 @@ export class QueueManagerModule {
       provider: string
       queues: BullModuleOptions[]
       providerModule: DynamicModule
+      disabled?: boolean
     }>
   ): DynamicModule {
-    const queues: BullModuleOptions[] = providerIntegrations.reduce<BullModuleOptions[]>((acc, providerIntegration) => {
-      return acc.concat(providerIntegration.queues)
+    const enabledProviderIntegrations = providerIntegrations.filter((pi) => !pi.disabled)
+    const queues: BullModuleOptions[] = enabledProviderIntegrations.reduce<BullModuleOptions[]>((acc, pi) => {
+      return acc.concat(pi.queues)
     }, [])
-    const externalModule = providerIntegrations.map((providerIntegration) => providerIntegration.providerModule)
+    const externalModule = enabledProviderIntegrations.map((pi) => pi.providerModule)
 
     const queueModules: any[] = queues.map((queue) => BullModule.registerQueue(queue))
     const queueProviders: Provider[] = queues.map((queue) => ({

@@ -25,5 +25,6 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/space-before-function-paren': 'off',
     '@typescript-eslint/indent': 'off',
+    '@typescript-eslint/consistent-type-imports': 'off'
   }
 }
