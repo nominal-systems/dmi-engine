@@ -8,7 +8,7 @@ import {
   Resource
 } from '@nominal-systems/dmi-engine-common'
 import { Ctx, MessagePattern, type MqttContext, Payload } from '@nestjs/microservices'
-import { QueueService } from '../services/queue.service'
+import { QueueModuleService } from '../queue/queue-module.service'
 
 @Controller('engine')
 @UsePipes(
@@ -18,7 +18,7 @@ import { QueueService } from '../services/queue.service'
   })
 )
 export class EngineController implements ProviderIntegrationAdmin {
-  constructor(private readonly queueService: QueueService) {}
+  constructor(private readonly queueService: QueueModuleService) {}
 
   // TODO(gb): use a wildcard to match all providers
   @MessagePattern(`wisdom-panel/${Resource.Integration}/${Operation.Create}`)
@@ -27,7 +27,7 @@ export class EngineController implements ProviderIntegrationAdmin {
     @Ctx() context: MqttContext
   ): Promise<void> {
     const providerId = context.getTopic().split('/')[0]
-    await this.queueService.startPollingJobsForIntegration(providerId, jobData.data)
+    await this.queueService.startPollingJobsForIntegration(providerId, jobData.data.payload.integrationId, jobData.data)
   }
 
   // TODO(gb): use a wildcard to match all providers
@@ -37,7 +37,7 @@ export class EngineController implements ProviderIntegrationAdmin {
     @Ctx() context: MqttContext
   ): Promise<void> {
     const providerId = context.getTopic().split('/')[0]
-    await this.queueService.stopPollingJobsForIntegration(providerId, jobData.data)
+    await this.queueService.stopPollingJobsForIntegration(providerId, jobData.data.payload.integrationId)
   }
 
   // TODO(gb): use a wildcard to match all providers
@@ -47,7 +47,11 @@ export class EngineController implements ProviderIntegrationAdmin {
     @Ctx() context: MqttContext
   ): Promise<void> {
     const providerId = context.getTopic().split('/')[0]
-    await this.queueService.updatePollingJobsForIntegration(providerId, jobData.data)
+    await this.queueService.updatePollingJobsForIntegration(
+      providerId,
+      jobData.data.payload.integrationId,
+      jobData.data
+    )
   }
 
   // TODO(gb): remove this method once the wildcard is implemented

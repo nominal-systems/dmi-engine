@@ -1,6 +1,6 @@
 import { Test, type TestingModule } from '@nestjs/testing'
 import { EngineController } from './engine.controller'
-import { QueueService } from '../services/queue.service'
+import { QueueModuleService } from '../queue/queue-module.service'
 
 describe('EngineController', () => {
   let controller: EngineController
@@ -9,7 +9,7 @@ describe('EngineController', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
-          provide: QueueService,
+          provide: QueueModuleService,
           useValue: {}
         }
       ],
