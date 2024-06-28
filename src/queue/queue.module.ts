@@ -1,20 +1,20 @@
-import { BullModule, BullModuleOptions } from '@nestjs/bull'
-import { DynamicModule, Module, Provider } from '@nestjs/common'
+import { BullModule, type BullModuleOptions } from '@nestjs/bull'
+import { type DynamicModule, Module, type Provider } from '@nestjs/common'
 import { QueueModuleService } from './queue-module.service'
 import { QueueController } from './queue.controller'
 
 @Module({})
 export class QueueModule {
   static register(
-    providerIntegrations: {
+    providerIntegrations: Array<{
       provider: string
       queues: BullModuleOptions[]
       providerModule: DynamicModule
-    }[]
+    }>
   ): DynamicModule {
-    const queues: BullModuleOptions[] = providerIntegrations.reduce((acc, providerIntegration) => {
+    const queues: BullModuleOptions[] = providerIntegrations.reduce<BullModuleOptions[]>((acc, providerIntegration) => {
       return acc.concat(providerIntegration.queues)
-    }, [] as BullModuleOptions[])
+    }, [])
     const externalModule = providerIntegrations.map((providerIntegration) => providerIntegration.providerModule)
 
     const queueModules: any[] = queues.map((queue) => BullModule.registerQueue(queue))
