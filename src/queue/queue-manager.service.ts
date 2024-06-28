@@ -6,8 +6,8 @@ import { ExistingIntegrationPayload, IPayload, NewIntegrationPayload } from '@no
 import { JobCounts, Queue } from 'bull'
 
 @Injectable()
-export class QueueModuleService implements OnModuleInit {
-  private readonly logger = new Logger(QueueModuleService.name)
+export class QueueManager implements OnModuleInit {
+  private readonly logger = new Logger(QueueManager.name)
   private readonly jobsConfig = this.configService.get('jobs')
   private readonly queues: Map<string, Queue> = new Map()
 
@@ -67,7 +67,11 @@ export class QueueModuleService implements OnModuleInit {
     }
   }
 
-  async updatePollingJobsForIntegration(providerId: string, jobId: string, data: IPayload<ExistingIntegrationPayload>): Promise<void> {
+  async updatePollingJobsForIntegration(
+    providerId: string,
+    jobId: string,
+    data: IPayload<ExistingIntegrationPayload>
+  ): Promise<void> {
     await this.stopPollingJobsForIntegration(providerId, jobId)
     await this.startPollingJobsForIntegration(providerId, jobId, data)
   }

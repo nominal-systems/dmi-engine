@@ -5,7 +5,7 @@ import { EngineController } from './engine/engine.controller'
 import { BullModule } from '@nestjs/bull'
 import { WisdomPanelModule } from '@nominal-systems/dmi-engine-wisdom-panel-integration'
 import { AntechV6Module } from '@nominal-systems/dmi-engine-antech-v6-integration'
-import { QueueModule } from './queue/queue.module'
+import { QueueManagerModule } from './queue/queue-manager.module'
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { QueueModule } from './queue/queue.module'
       }),
       inject: [ConfigService]
     }),
-    QueueModule.register([
+    QueueManagerModule.register([
       {
         provider: 'antech-v6',
         queues: [{ name: 'antech-v6.results' }, { name: 'antech-v6.orders' }],

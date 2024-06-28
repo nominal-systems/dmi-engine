@@ -1,10 +1,10 @@
 import { BullModule, type BullModuleOptions } from '@nestjs/bull'
 import { type DynamicModule, Module, type Provider } from '@nestjs/common'
-import { QueueModuleService } from './queue-module.service'
-import { QueueController } from './queue.controller'
+import { QueueManager } from './queue-manager.service'
+import { QueueManagerController } from './queue-manager.controller'
 
 @Module({})
-export class QueueModule {
+export class QueueManagerModule {
   static register(
     providerIntegrations: Array<{
       provider: string
@@ -21,22 +21,22 @@ export class QueueModule {
     const queueProviders: Provider[] = queues.map((queue) => ({
       provide: `${queue.name}Queue`,
       useFactory: (queueService) => queueService.getQueue(queue.name),
-      inject: [QueueModuleService]
+      inject: [QueueManager]
     }))
 
     return {
-      module: QueueModule,
+      module: QueueManagerModule,
       imports: [...queueModules, ...externalModule],
       providers: [
-        QueueModuleService,
+        QueueManager,
         ...queueProviders,
         {
           provide: 'QUEUE_NAMES',
           useValue: queues.map((queue) => queue.name)
         }
       ],
-      controllers: [QueueController],
-      exports: [QueueModuleService]
+      controllers: [QueueManagerController],
+      exports: [QueueManager]
     }
   }
 }

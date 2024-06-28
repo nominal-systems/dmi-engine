@@ -1,10 +1,10 @@
 import { Controller, Get } from '@nestjs/common'
-import { QueueModuleService } from './queue-module.service'
+import { QueueManager } from './queue-manager.service'
 import { QueuesInfo } from '../interfaces/responses.interfaces'
 
 @Controller('queues')
-export class QueueController {
-  constructor(private readonly queueModuleService: QueueModuleService) {}
+export class QueueManagerController {
+  constructor(private readonly queueManager: QueueManager) {}
 
   @Get()
   async getJobCounts(): Promise<QueuesInfo> {
@@ -12,11 +12,11 @@ export class QueueController {
       total: 0,
       queues: {}
     }
-    const queueNames = this.queueModuleService.getQueueNames()
+    const queueNames = this.queueManager.getQueueNames()
     queuesInfo.total = queueNames.length
     for (const queueName of queueNames) {
       queuesInfo.queues[queueName] = {
-        jobCounts: await this.queueModuleService.getJobCounts(queueName)
+        jobCounts: await this.queueManager.getJobCounts(queueName)
       }
     }
 

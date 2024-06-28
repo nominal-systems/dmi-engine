@@ -8,7 +8,7 @@ import {
   Resource
 } from '@nominal-systems/dmi-engine-common'
 import { Ctx, MessagePattern, type MqttContext, Payload } from '@nestjs/microservices'
-import { QueueModuleService } from '../queue/queue-module.service'
+import { QueueManager } from '../queue/queue-manager.service'
 
 @Controller('engine')
 @UsePipes(
@@ -18,7 +18,7 @@ import { QueueModuleService } from '../queue/queue-module.service'
   })
 )
 export class EngineController implements ProviderIntegrationAdmin {
-  constructor(private readonly queueService: QueueModuleService) {}
+  constructor(private readonly queueManager: QueueManager) {}
 
   // TODO(gb): use a wildcard to match all providers
   @MessagePattern(`wisdom-panel/${Resource.Integration}/${Operation.Create}`)
@@ -27,7 +27,7 @@ export class EngineController implements ProviderIntegrationAdmin {
     @Ctx() context: MqttContext
   ): Promise<void> {
     const providerId = context.getTopic().split('/')[0]
-    await this.queueService.startPollingJobsForIntegration(providerId, jobData.data.payload.integrationId, jobData.data)
+    await this.queueManager.startPollingJobsForIntegration(providerId, jobData.data.payload.integrationId, jobData.data)
   }
 
   // TODO(gb): use a wildcard to match all providers
@@ -37,7 +37,7 @@ export class EngineController implements ProviderIntegrationAdmin {
     @Ctx() context: MqttContext
   ): Promise<void> {
     const providerId = context.getTopic().split('/')[0]
-    await this.queueService.stopPollingJobsForIntegration(providerId, jobData.data.payload.integrationId)
+    await this.queueManager.stopPollingJobsForIntegration(providerId, jobData.data.payload.integrationId)
   }
 
   // TODO(gb): use a wildcard to match all providers
@@ -47,7 +47,7 @@ export class EngineController implements ProviderIntegrationAdmin {
     @Ctx() context: MqttContext
   ): Promise<void> {
     const providerId = context.getTopic().split('/')[0]
-    await this.queueService.updatePollingJobsForIntegration(
+    await this.queueManager.updatePollingJobsForIntegration(
       providerId,
       jobData.data.payload.integrationId,
       jobData.data
