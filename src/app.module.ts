@@ -31,7 +31,12 @@ import { QueueManagerModule } from './queue/queue-manager.module'
       },
       'wisdom-panel': {
         queues: [{ name: 'wisdom-panel.results' }, { name: 'wisdom-panel.orders' }],
-        providerModule: WisdomPanelModule.register()
+        providerModule: WisdomPanelModule.register(),
+        options: {
+          repeat: {
+            every: 1000 * 60 * 10
+          }
+        }
       }
     })
   ],

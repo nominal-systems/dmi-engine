@@ -34,7 +34,7 @@ export class QueueManagerModule {
     const providerJobOptions: Record<string, JobOptions | undefined> = {}
     for (const providerId in providerIntegrations) {
       if (
-        providerIntegrations.providerId !== undefined &&
+        providerIntegrations[providerId] !== undefined &&
         providerIntegrations[providerId].disabled !== true &&
         providerIntegrations[providerId].options !== undefined
       ) {
