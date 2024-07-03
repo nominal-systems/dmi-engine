@@ -1,4 +1,4 @@
-import { type CronRepeatOptions, type EveryRepeatOptions } from 'bull'
+import { type EveryRepeatOptions } from 'bull'
 import { type RedisOptions } from 'ioredis'
 
 export interface AppConfig {
@@ -14,7 +14,7 @@ export interface AppConfig {
     >
   }
   jobs: {
-    repeat: CronRepeatOptions | EveryRepeatOptions
+    repeat: EveryRepeatOptions
   }
 }
 

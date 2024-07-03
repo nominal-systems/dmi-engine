@@ -24,18 +24,16 @@ import { QueueManagerModule } from './queue/queue-manager.module'
       }),
       inject: [ConfigService]
     }),
-    QueueManagerModule.register([
-      {
-        provider: 'antech-v6',
+    QueueManagerModule.register({
+      'antech-v6': {
         queues: [{ name: 'antech-v6.results' }, { name: 'antech-v6.orders' }],
         providerModule: AntechV6Module.register()
       },
-      {
-        provider: 'wisdom-panel',
+      'wisdom-panel': {
         queues: [{ name: 'wisdom-panel.results' }, { name: 'wisdom-panel.orders' }],
         providerModule: WisdomPanelModule.register()
       }
-    ])
+    })
   ],
   providers: [],
   controllers: [EngineController]

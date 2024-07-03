@@ -3,26 +3,53 @@ import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ModuleRef } from '@nestjs/core'
 import { ExistingIntegrationPayload, IPayload, NewIntegrationPayload } from '@nominal-systems/dmi-engine-common'
-import { EveryRepeatOptions, JobCounts, JobId, JobOptions, Queue } from 'bull'
+import { EveryRepeatOptions, Job, JobCounts, Queue } from 'bull'
+import { QueueManagerJobOptions } from './queue-manager.interface'
 
 @Injectable()
 export class QueueManager implements OnModuleInit {
   private readonly logger = new Logger(QueueManager.name)
-  private readonly jobsConfig = this.configService.get('jobs')
+  private readonly defaultJobOptions: QueueManagerJobOptions = this.configService.getOrThrow('jobs')
   private readonly queues = new Map<string, Queue>()
 
   constructor(
     private readonly configService: ConfigService,
     @Inject('QUEUE_NAMES') private readonly queueNames: string[],
+    @Inject('JOB_OPTIONS') private readonly jobOptions: Record<string, QueueManagerJobOptions>,
     private readonly moduleRef: ModuleRef
   ) {}
 
   async onModuleInit() {
-    this.queueNames.forEach((queueName) => {
+    for (const queueName of this.queueNames) {
+      const providerId = queueName.split('.')[0]
+      const providerJobOptions = this.getJobOptions(providerId)
       const queue = this.moduleRef.get<Queue>(getQueueToken(queueName), { strict: false })
       this.queues.set(queueName, queue)
-      this.logger.log(`Queue Manager initialized for queue ${queueName}`)
-    })
+      const jobs = await queue.getJobs(['active', 'waiting', 'delayed', 'completed', 'failed'])
+
+      // Repeatable jobs
+      const repeatableJobsInfo = await queue.getRepeatableJobs()
+      for (const jobInfo of repeatableJobsInfo) {
+        const jobRepeat = {
+          repeat: {
+            every: jobInfo.every
+          }
+        }
+        this.logger.log(
+          `Initializing jobs for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}`
+        )
+
+        if (jobInfo.id !== undefined && providerJobOptions.repeat.every !== jobRepeat.repeat.every) {
+          this.logger.warn(
+            `Job for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}' has different repeat interval than configured: current ${jobRepeat.repeat.every / 1000}s, target: ${providerJobOptions.repeat.every / 1000}s`
+          )
+          const job = jobs.find((j) => j.opts?.repeat?.key === jobInfo.key)
+          if (job !== undefined && job !== null) {
+            await this.updateJobRepeatOptions(queue, job, jobInfo.id, providerJobOptions.repeat)
+          }
+        }
+      }
+    }
   }
 
   getQueue(queueName: string): Queue | undefined {
@@ -52,20 +79,21 @@ export class QueueManager implements OnModuleInit {
     jobId: string,
     data: IPayload<NewIntegrationPayload>
   ): Promise<void> {
+    this.logger.log(`Starting polling jobs for integration '${jobId}' (${provider.toUpperCase()})`)
     const providerQueues = this.getQueues(provider)
-    const jobOptions: JobOptions = { ...this.jobsConfig, jobId }
+    const providerJobOptions = this.getJobOptions(provider)
     for (const queue of providerQueues) {
-      await queue.add(data, jobOptions)
-      this.logger.debug(`Added job '${jobId}' to queue ${queue.name}`)
+      await this.startRepeatingJob(queue, jobId, providerJobOptions.repeat, data)
     }
   }
 
   async stopPollingJobsForIntegration(provider: string, jobId: string): Promise<void> {
+    this.logger.log(`Stopping polling jobs for integration '${jobId}' (${provider.toUpperCase()})`)
     const providerQueues = this.getQueues(provider)
-    const repeat: EveryRepeatOptions & { jobId?: JobId } = { ...this.jobsConfig.repeat, jobId }
     for (const queue of providerQueues) {
-      await queue.removeRepeatable(repeat)
-      this.logger.debug(`Removed repeatable job '${jobId}' from queue ${queue.name}`)
+      const jobOptions = this.getJobOptions(provider).repeat
+      await this.removeRepeatableJob(queue, jobId, jobOptions)
+      this.logger.debug(`Stopped repeating job '${jobId}' in queue ${queue.name}`)
     }
   }
 
@@ -78,6 +106,16 @@ export class QueueManager implements OnModuleInit {
     await this.startPollingJobsForIntegration(providerId, jobId, data)
   }
 
+  async updateJobRepeatOptions(
+    queue: Queue,
+    job: Job,
+    jobId: string,
+    newRepeatOptions: EveryRepeatOptions
+  ): Promise<void> {
+    await this.stopRepeatingJob(queue, job, jobId)
+    await this.startRepeatingJob(queue, jobId, newRepeatOptions, job.data)
+  }
+
   async getJobCounts(queueName: string): Promise<JobCounts> {
     const queue = this.getQueue(queueName)
     if (queue !== undefined) {
@@ -85,5 +123,42 @@ export class QueueManager implements OnModuleInit {
     } else {
       throw new Error(`Queue ${queueName} not found`)
     }
+  }
+
+  private getJobOptions(providerId: string): QueueManagerJobOptions {
+    if (this.jobOptions[providerId] !== undefined) {
+      return this.jobOptions[providerId]
+    } else {
+      return this.defaultJobOptions
+    }
+  }
+
+  private async removeRepeatableJob(
+    queue: Queue,
+    jobId: string,
+    everyRepeatOptions: EveryRepeatOptions
+  ): Promise<void> {
+    await queue.removeRepeatable({ ...everyRepeatOptions, jobId })
+  }
+
+  private async stopRepeatingJob(queue: Queue, job: Job, jobId: string): Promise<void> {
+    const currentRepeatOptions = job.opts?.repeat
+    const repeatEvery = (currentRepeatOptions as EveryRepeatOptions).every
+    if (currentRepeatOptions !== undefined && repeatEvery !== undefined) {
+      await this.removeRepeatableJob(queue, jobId, { every: repeatEvery })
+      this.logger.debug(`Stopped repeating job '${jobId}' in queue ${queue.name}`)
+    }
+  }
+
+  private async startRepeatingJob(
+    queue: Queue,
+    jobId: string,
+    repeatOptions: EveryRepeatOptions,
+    jobData: any
+  ): Promise<void> {
+    this.logger.debug(
+      `Started repeating job '${jobId}' in queue ${queue.name}: repeat every ${repeatOptions.every / 1000}s`
+    )
+    await queue.add(jobData, { repeat: repeatOptions, jobId })
   }
 }
