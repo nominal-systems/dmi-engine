@@ -24,14 +24,17 @@ import { QueueManagerModule } from './queue/queue-manager.module'
       }),
       inject: [ConfigService]
     }),
+    // TODO(gb): inject the ConfigService into the QueueManagerModule
     QueueManagerModule.register({
       'antech-v6': {
         queues: [{ name: 'antech-v6.results' }, { name: 'antech-v6.orders' }],
-        providerModule: AntechV6Module.register()
+        providerModule: AntechV6Module.register(),
+        disabled: process.env.ANTECH_V6_DISABLED === 'true' || false
       },
       'wisdom-panel': {
         queues: [{ name: 'wisdom-panel.results' }, { name: 'wisdom-panel.orders' }],
         providerModule: WisdomPanelModule.register(),
+        disabled: process.env.WISDOM_PANEL_DISABLED === 'true' || false,
         options: {
           repeat: {
             every: 1000 * 60 * 10
