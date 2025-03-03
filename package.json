@@ -35,7 +35,7 @@
     "@nestjs/platform-express": "^10.3.2",
     "@nominal-systems/dmi-engine-antech-v6-integration": "^0.2.12",
     "@nominal-systems/dmi-engine-common": "^1.1.6",
-    "@nominal-systems/dmi-engine-wisdom-panel-integration": "^0.3.10",
+    "@nominal-systems/dmi-engine-wisdom-panel-integration": "^0.3.11",
     "bull": "^4.12.2",
     "cache-manager": "^5.5.1",
     "class-transformer": "^0.5.1",
