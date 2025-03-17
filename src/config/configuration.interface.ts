@@ -1,10 +1,34 @@
 import { type EveryRepeatOptions } from 'bull'
-import { type RedisOptions } from 'ioredis'
+import { type ClusterNode, type ClusterOptions, type RedisOptions } from 'ioredis'
+
+/**
+ * Combined type for Redis configuration that can be either standalone or cluster
+ */
+export type RedisConfig = RedisStandaloneConfig | RedisClusterConfig
+
+/**
+ * Standalone Redis configuration
+ */
+export interface RedisStandaloneConfig extends RedisOptions {
+  cluster?: undefined
+  nodes?: undefined
+}
+
+/**
+ * Redis Cluster configuration
+ */
+export interface RedisClusterConfig {
+  cluster?: ClusterNode[]
+  nodes?: ClusterNode[]
+  clusterOptions?: ClusterOptions
+  password?: string
+  redisOptions?: RedisOptions
+}
 
 export interface AppConfig {
   port: number
   mqtt: MQTTConfig
-  redis: RedisOptions
+  redis: RedisConfig
   queues: {
     clean: Record<
       string,
