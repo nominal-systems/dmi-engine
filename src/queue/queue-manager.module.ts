@@ -1,9 +1,10 @@
 import { BullModule, type BullModuleOptions } from '@nestjs/bull'
-import { type DynamicModule, Module, type Provider } from '@nestjs/common'
+import { type DynamicModule, Logger, Module, type Provider } from '@nestjs/common'
 import { QueueManager } from './queue-manager.service'
 import { QueueManagerController } from './queue-manager.controller'
 import { JobOptions } from 'bull'
 import { QueueManagerJobOptions } from './queue-manager.interface'
+import { BullQueueModule } from '../bull/bull-queue.module'
 
 @Module({})
 export class QueueManagerModule {
@@ -18,12 +19,19 @@ export class QueueManagerModule {
       }
     >
   ): DynamicModule {
+    const logger = new Logger('QueueManagerModule')
+
     const enabledProviderIntegrations = Object.values(providerIntegrations).filter((pi) => pi.disabled !== true)
     const providerModules = enabledProviderIntegrations.map((pi) => pi.providerModule)
 
     const queues: BullModuleOptions[] = enabledProviderIntegrations.reduce<BullModuleOptions[]>((acc, pi) => {
       return acc.concat(pi.queues)
     }, [])
+
+    // Extract all queue names for our BullQueueModule
+    const queueNames: string[] = queues.map((q) => q.name).filter((name): name is string => typeof name === 'string')
+    logger.debug(`Registering ${queueNames.length} queues: ${queueNames.join(', ')}`)
+
     const queueModules: any[] = queues.map((queue) => BullModule.registerQueue(queue))
     const queueProviders: Provider[] = queues.map((queue) => ({
       provide: `${queue.name}Queue`,
@@ -44,7 +52,12 @@ export class QueueManagerModule {
 
     return {
       module: QueueManagerModule,
-      imports: [...queueModules, ...providerModules],
+      imports: [
+        // Use the BullQueueModule that respects Redis connectivity
+        BullQueueModule.registerAsync(queueNames),
+        ...queueModules,
+        ...providerModules
+      ],
       providers: [
         QueueManager,
         ...queueProviders,
