@@ -15,13 +15,35 @@ import { QueueManagerModule } from './queue/queue-manager.module'
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        redis: configService.get('redis'),
-        defaultJobOptions: {
-          removeOnComplete: true,
-          removeOnFail: true
+      useFactory: async (configService: ConfigService) => {
+        const redis = configService.get('redis')
+
+        const redisOptions = redis.isCluster === true
+          ? {
+              cluster: {
+                nodes: [
+                  {
+                    host: redis.host,
+                    port: redis.port
+                  }
+                ],
+                password: redis.password
+              }
+            }
+          : {
+              host: redis.host,
+              port: redis.port,
+              password: redis.password
+            }
+
+        return {
+          redis: redisOptions,
+          defaultJobOptions: {
+            removeOnComplete: true,
+            removeOnFail: true
+          }
         }
-      }),
+      },
       inject: [ConfigService]
     }),
     // TODO(gb): inject the ConfigService into the QueueManagerModule

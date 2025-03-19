@@ -4,7 +4,7 @@ import { type RedisOptions } from 'ioredis'
 export interface AppConfig {
   port: number
   mqtt: MQTTConfig
-  redis: RedisOptions
+  redis: RedisOptions & { isCluster: boolean }
   queues: {
     clean: Record<
       string,

@@ -10,6 +10,7 @@ export default (): AppConfig => ({
     password: process.env.MQTT_PASSWORD ?? ''
   },
   redis: {
+    isCluster: process.env.REDIS_CLUSTER_ENABLED === 'true',
     host: process.env.REDIS_HOST ?? 'localhost',
     port: Number(process.env.REDIS_PORT ?? 6379),
     password: process.env.REDIS_PASSWORD ?? ''
