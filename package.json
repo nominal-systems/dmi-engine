@@ -33,7 +33,7 @@
     "@nestjs/core": "^10.3.2",
     "@nestjs/microservices": "^10.3.2",
     "@nestjs/platform-express": "^10.3.2",
-    "@nominal-systems/dmi-engine-antech-v6-integration": "^0.4.0",
+    "@nominal-systems/dmi-engine-antech-v6-integration": "^0.4.1",
     "@nominal-systems/dmi-engine-common": "^1.1.9",
     "@nominal-systems/dmi-engine-wisdom-panel-integration": "^0.3.13",
     "bull": "^4.12.2",
