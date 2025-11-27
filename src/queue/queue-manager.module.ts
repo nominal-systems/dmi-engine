@@ -24,7 +24,12 @@ export class QueueManagerModule {
     const queues: BullModuleOptions[] = enabledProviderIntegrations.reduce<BullModuleOptions[]>((acc, pi) => {
       return acc.concat(pi.queues)
     }, [])
-    const queueModules: any[] = queues.map((queue) => BullModule.registerQueue(queue))
+    const queueModules: any[] = queues.map((queue) =>
+      BullModule.registerQueue({
+        ...queue,
+        prefix: `{${queue.name}}`
+      })
+    )
     const queueProviders: Provider[] = queues.map((queue) => ({
       provide: `${queue.name}Queue`,
       useFactory: (queueService) => queueService.getQueue(queue.name),

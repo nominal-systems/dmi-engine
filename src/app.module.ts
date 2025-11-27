@@ -6,6 +6,7 @@ import { BullModule } from '@nestjs/bull'
 import { WisdomPanelModule } from '@nominal-systems/dmi-engine-wisdom-panel-integration'
 import { AntechV6Module } from '@nominal-systems/dmi-engine-antech-v6-integration'
 import { QueueManagerModule } from './queue/queue-manager.module'
+import Redis, { type RedisOptions } from 'ioredis'
 
 @Module({
   imports: [
@@ -18,26 +19,37 @@ import { QueueManagerModule } from './queue/queue-manager.module'
       useFactory: async (configService: ConfigService) => {
         const redis = configService.get('redis')
 
-        const redisOptions = redis.isCluster === true
-          ? {
-              cluster: {
-                nodes: [
+        const auth = {
+          ...(redis.username ? { username: redis.username } : {}),
+          ...(redis.password ? { password: redis.password } : {})
+        }
+        const tls =
+          redis.port === 6380 || process.env.REDIS_TLS_ENABLED === 'true'
+            ? { servername: redis.host }
+            : undefined
+
+        const baseRedisOptions: RedisOptions = {
+          host: redis.host,
+          port: redis.port,
+          ...auth,
+          ...(tls !== undefined ? { tls } : {})
+        }
+
+        return {
+          createClient: () =>
+            redis.isCluster === true
+              ? new Redis.Cluster(
+                [
                   {
                     host: redis.host,
                     port: redis.port
                   }
                 ],
-                password: redis.password
-              }
-            }
-          : {
-              host: redis.host,
-              port: redis.port,
-              password: redis.password
-            }
-
-        return {
-          redis: redisOptions,
+                {
+                  redisOptions: baseRedisOptions
+                }
+              )
+              : new Redis(baseRedisOptions),
           defaultJobOptions: {
             removeOnComplete: true,
             removeOnFail: true
