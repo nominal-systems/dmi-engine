@@ -17,27 +17,58 @@ import Redis, { type RedisOptions } from 'ioredis'
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const redis = configService.get('redis')
+        const redis =
+          configService.getOrThrow<RedisOptions & { isCluster: boolean, username?: string, password?: string }>('redis')
 
-        const auth = {
-          ...(redis.username ? { username: redis.username } : {}),
-          ...(redis.password ? { password: redis.password } : {})
-        }
+        const username = redis.username ?? ''
+        const password = redis.password ?? ''
+
+        const auth =
+          username !== '' || password !== ''
+            ? {
+                ...(username !== '' ? { username } : {}),
+                ...(password !== '' ? { password } : {})
+              }
+            : {}
+        const tlsEnabledEnv = process.env.REDIS_TLS_ENABLED
         const tls =
-          redis.port === 6380 || process.env.REDIS_TLS_ENABLED === 'true'
+          tlsEnabledEnv === 'true'
             ? { servername: redis.host }
-            : undefined
+            : tlsEnabledEnv === 'false'
+              ? undefined
+              : redis.port === 6380
+                ? { servername: redis.host }
+                : undefined
 
         const baseRedisOptions: RedisOptions = {
           host: redis.host,
           port: redis.port,
           ...auth,
-          ...(tls !== undefined ? { tls } : {})
+          ...(tls !== undefined ? { tls } : {}),
+          enableReadyCheck: false,
+          maxRetriesPerRequest: null
         }
+
+        console.log('[redis] config', {
+          host: redis.host,
+          port: redis.port,
+          isCluster: redis.isCluster,
+          username: username !== '' ? username : undefined,
+          password: password !== '' ? '***' : undefined,
+          tls: tls !== undefined
+        })
+
+        console.log('[redis] base options', {
+          ...baseRedisOptions,
+          password:
+            baseRedisOptions.password !== undefined && baseRedisOptions.password !== '' ? '***' : undefined,
+          username: baseRedisOptions.username ?? undefined,
+          tls: tls !== undefined
+        })
 
         return {
           createClient: () =>
-            redis.isCluster === true
+            redis.isCluster
               ? new Redis.Cluster(
                 [
                   {
