@@ -2,7 +2,7 @@ import { Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import Redis, { type ClusterOptions, type RedisOptions } from 'ioredis'
 
-type RedisConfig = RedisOptions & { isCluster: boolean; username?: string; password?: string }
+type RedisConfig = RedisOptions & { isCluster: boolean, username?: string, password?: string }
 
 export const createBullRedisOptions = (configService: ConfigService, logger = new Logger('Redis')) => {
   const redis = configService.getOrThrow<RedisConfig>('redis')
