@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Logger, Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import configuration from './config/configuration'
 import { EngineController } from './engine/engine.controller'
@@ -6,7 +6,7 @@ import { BullModule } from '@nestjs/bull'
 import { WisdomPanelModule } from '@nominal-systems/dmi-engine-wisdom-panel-integration'
 import { AntechV6Module } from '@nominal-systems/dmi-engine-antech-v6-integration'
 import { QueueManagerModule } from './queue/queue-manager.module'
-import Redis, { type RedisOptions } from 'ioredis'
+import Redis, { type ClusterOptions, type RedisOptions } from 'ioredis'
 
 @Module({
   imports: [
@@ -17,6 +17,7 @@ import Redis, { type RedisOptions } from 'ioredis'
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
+        const logger = new Logger('Redis')
         const redis =
           configService.getOrThrow<RedisOptions & { isCluster: boolean, username?: string, password?: string }>('redis')
 
@@ -40,13 +41,21 @@ import Redis, { type RedisOptions } from 'ioredis'
                 ? { servername: redis.host }
                 : undefined
 
+        const slotsRefreshTimeoutMs =
+          process.env.REDIS_SLOTS_REFRESH_TIMEOUT_MS !== undefined
+            ? Number(process.env.REDIS_SLOTS_REFRESH_TIMEOUT_MS)
+            : 5000
+        const connectTimeoutMs =
+          process.env.REDIS_CONNECT_TIMEOUT_MS !== undefined ? Number(process.env.REDIS_CONNECT_TIMEOUT_MS) : undefined
+
         const baseRedisOptions: RedisOptions = {
           host: redis.host,
           port: redis.port,
           ...auth,
           ...(tls !== undefined ? { tls } : {}),
           enableReadyCheck: false,
-          maxRetriesPerRequest: null
+          maxRetriesPerRequest: null,
+          ...(connectTimeoutMs !== undefined && !Number.isNaN(connectTimeoutMs) ? { connectTimeout: connectTimeoutMs } : {})
         }
 
         console.log('[redis] config', {
@@ -66,9 +75,23 @@ import Redis, { type RedisOptions } from 'ioredis'
           tls: tls !== undefined
         })
 
+        const clusterOptions: ClusterOptions = {
+          redisOptions: baseRedisOptions,
+          slotsRefreshTimeout: Number.isNaN(slotsRefreshTimeoutMs) ? 5000 : slotsRefreshTimeoutMs,
+          clusterRetryStrategy: (attempts: number) => Math.min(1000 * (attempts + 1), 10000)
+        }
+
         return {
-          createClient: () =>
-            redis.isCluster
+          createClient: (type = 'client') => {
+            const logContext = {
+              host: redis.host,
+              port: redis.port,
+              isCluster: redis.isCluster,
+              tls: tls !== undefined,
+              type
+            }
+
+            const client = redis.isCluster
               ? new Redis.Cluster(
                 [
                   {
@@ -76,11 +99,21 @@ import Redis, { type RedisOptions } from 'ioredis'
                     port: redis.port
                   }
                 ],
-                {
-                  redisOptions: baseRedisOptions
-                }
+                clusterOptions
               )
-              : new Redis(baseRedisOptions),
+              : new Redis(baseRedisOptions)
+
+            client.on('error', (error) => {
+              console.error('[redis] client error', error)
+            })
+            client.once('ready', () => {
+              logger.debug(
+                `[redis] connected host=${logContext.host} port=${logContext.port} cluster=${logContext.isCluster} tls=${logContext.tls} type=${logContext.type}`
+              )
+            })
+
+            return client
+          },
           defaultJobOptions: {
             removeOnComplete: true,
             removeOnFail: true

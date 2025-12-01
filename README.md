@@ -69,6 +69,18 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Redis configuration
+
+The engine can connect to a single Redis instance or a Redis Cluster. Configure via environment variables:
+- `REDIS_HOST` / `REDIS_PORT` — host and port of the Redis entrypoint (for cluster, this is the startup node).
+- `REDIS_CLUSTER_ENABLED` — set to `true` to enable Redis Cluster mode; otherwise a single-node client is used.
+- `REDIS_USERNAME` / `REDIS_PASSWORD` — optional auth credentials passed to ioredis (supports ACL users).
+- `REDIS_TLS_ENABLED` — `true` forces TLS, `false` disables it. If unset, TLS is auto-enabled when `REDIS_PORT=6380`.
+- `REDIS_SLOTS_REFRESH_TIMEOUT_MS` — (cluster only) how long to wait when refreshing the cluster slots map before failing. Default: `5000`.
+- `REDIS_CONNECT_TIMEOUT_MS` — client connection timeout in milliseconds. Defaults to ioredis’ built-in value when unset.
+
+Bull queue keys are hash-tagged (`{queueName}`) so they stay in a single slot when using Redis Cluster.
+
 ## Configure Secrets
 
 The GitHub Actions expect the following secrets to be configured in the repository:
