@@ -76,8 +76,9 @@ The engine can connect to a single Redis instance or a Redis Cluster. Configure 
 - `REDIS_CLUSTER_ENABLED` — set to `true` to enable Redis Cluster mode; otherwise a single-node client is used.
 - `REDIS_USERNAME` / `REDIS_PASSWORD` — optional auth credentials passed to ioredis (supports ACL users).
 - `REDIS_TLS_ENABLED` — `true` forces TLS, `false` disables it. If unset, TLS is auto-enabled when `REDIS_PORT=6380`.
-- `REDIS_SLOTS_REFRESH_TIMEOUT_MS` — (cluster only) how long to wait when refreshing the cluster slots map before failing. Default: `5000`.
-- `REDIS_CONNECT_TIMEOUT_MS` — client connection timeout in milliseconds. Defaults to ioredis’ built-in value when unset.
+- `REDIS_SLOTS_REFRESH_TIMEOUT_MS` — (cluster only) how long to wait when refreshing the cluster slots map before failing. Default: `15000`.
+- `REDIS_CONNECT_TIMEOUT_MS` — client connection timeout in milliseconds. Default: `15000`.
+- `REDIS_CLUSTER_RETRY_BASE_MS` / `REDIS_CLUSTER_RETRY_MAX_MS` — backoff timing for cluster reconnects. Defaults: `1000` base, capped at `20000`.
 
 Bull queue keys are hash-tagged (`{queueName}`) so they stay in a single slot when using Redis Cluster.
 

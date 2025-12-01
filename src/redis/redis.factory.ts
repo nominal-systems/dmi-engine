@@ -30,9 +30,13 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
   const slotsRefreshTimeoutMs =
     process.env.REDIS_SLOTS_REFRESH_TIMEOUT_MS !== undefined
       ? Number(process.env.REDIS_SLOTS_REFRESH_TIMEOUT_MS)
-      : 5000
+      : 15000
   const connectTimeoutMs =
-    process.env.REDIS_CONNECT_TIMEOUT_MS !== undefined ? Number(process.env.REDIS_CONNECT_TIMEOUT_MS) : undefined
+    process.env.REDIS_CONNECT_TIMEOUT_MS !== undefined ? Number(process.env.REDIS_CONNECT_TIMEOUT_MS) : 15000
+  const clusterRetryBaseMs =
+    process.env.REDIS_CLUSTER_RETRY_BASE_MS !== undefined ? Number(process.env.REDIS_CLUSTER_RETRY_BASE_MS) : 1000
+  const clusterRetryMaxMs =
+    process.env.REDIS_CLUSTER_RETRY_MAX_MS !== undefined ? Number(process.env.REDIS_CLUSTER_RETRY_MAX_MS) : 20000
 
   const baseRedisOptions: RedisOptions = {
     host: redis.host,
@@ -52,8 +56,12 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
 
   const clusterOptions: ClusterOptions = {
     redisOptions: baseRedisOptions,
-    slotsRefreshTimeout: Number.isNaN(slotsRefreshTimeoutMs) ? 5000 : slotsRefreshTimeoutMs,
-    clusterRetryStrategy: (attempts: number) => Math.min(1000 * (attempts + 1), 10000)
+    slotsRefreshTimeout: Number.isNaN(slotsRefreshTimeoutMs) ? 15000 : slotsRefreshTimeoutMs,
+    clusterRetryStrategy: (attempts: number) => {
+      const base = Number.isNaN(clusterRetryBaseMs) ? 1000 : clusterRetryBaseMs
+      const max = Number.isNaN(clusterRetryMaxMs) ? 20000 : clusterRetryMaxMs
+      return Math.min(base * (attempts + 1), max)
+    }
   }
 
   return {
