@@ -7,6 +7,8 @@ import { WisdomPanelModule } from '@nominal-systems/dmi-engine-wisdom-panel-inte
 import { AntechV6Module } from '@nominal-systems/dmi-engine-antech-v6-integration'
 import { QueueManagerModule } from './queue/queue-manager.module'
 import { createBullRedisOptions } from './redis/redis.factory'
+import { FeatureFlagsModule } from './feature-flags/feature-flags.module'
+import { statsigFeatureFlagProvider } from './feature-flags/statsig-feature-flags.service'
 
 @Module({
   imports: [
@@ -14,6 +16,7 @@ import { createBullRedisOptions } from './redis/redis.factory'
       isGlobal: true,
       load: [configuration]
     }),
+    FeatureFlagsModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
@@ -33,7 +36,10 @@ import { createBullRedisOptions } from './redis/redis.factory'
     QueueManagerModule.register({
       'antech-v6': {
         queues: [{ name: 'antech-v6.results' }, { name: 'antech-v6.orders' }],
-        providerModule: AntechV6Module.register(),
+        providerModule: AntechV6Module.register({
+          imports: [FeatureFlagsModule],
+          featureFlagProvider: statsigFeatureFlagProvider
+        }),
         disabled: process.env.ANTECH_V6_DISABLED === 'true' || false
       },
       'wisdom-panel': {
