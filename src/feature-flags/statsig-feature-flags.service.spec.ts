@@ -1,6 +1,5 @@
 import { ConfigService } from '@nestjs/config'
 import { StatsigFeatureFlagsService } from './statsig-feature-flags.service'
-import Statsig from 'statsig-node'
 import { type AppConfig } from '../config/configuration.interface'
 
 jest.mock('statsig-node', () => ({

@@ -1,5 +1,4 @@
 import { ConfigService } from '@nestjs/config'
-import Statsig from 'statsig-node'
 import { type AppConfig } from '../config/configuration.interface'
 import { StatsigFeatureFlagsService } from './statsig-feature-flags.service'
 import { StatsigHeartbeatService } from './statsig-heartbeat.service'

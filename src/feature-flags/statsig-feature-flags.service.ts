@@ -76,7 +76,7 @@ export class StatsigFeatureFlagsService implements FeatureFlagProvider, OnModule
       return
     }
 
-    await Statsig.shutdown()
+    Statsig.shutdown()
     this.initialized = false
   }
 
