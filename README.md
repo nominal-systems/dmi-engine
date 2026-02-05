@@ -82,6 +82,23 @@ The engine can connect to a single Redis instance or a Redis Cluster. Configure 
 
 Bull queue keys are hash-tagged (`{queueName}`) so they stay in a single slot when using Redis Cluster.
 
+## Statsig (Feature Flags)
+
+The engine uses [Statsig](https://statsig.com/) for feature flag management. Configure via environment variables:
+
+- `STATSIG_ENABLED` - Set to `true` to enable Statsig integration. Defaults to `false`.
+- `STATSIG_SERVER_SECRET_KEY` - Server secret key from your Statsig project.
+- `STATSIG_ENVIRONMENT` - Environment tier (e.g., `development`, `staging`, `production`). Defaults to `NODE_ENV` or `local`.
+- `STATSIG_OVERRIDES` - Local overrides for feature gates (comma-separated `flag=true/false`).
+
+Local overrides allow the user to force-enable or force-disable specific feature gates without contacting Statsig:
+
+```bash
+STATSIG_OVERRIDES="my_feature=true,another_feature=false"
+```
+
+When `STATSIG_ENABLED=false` or the secret key is not set, all gates default to `false` unless an override is specified.
+
 ## Configure Secrets
 
 The GitHub Actions expect the following secrets to be configured in the repository:
