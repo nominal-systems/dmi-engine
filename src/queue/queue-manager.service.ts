@@ -21,33 +21,38 @@ export class QueueManager implements OnModuleInit {
 
   async onModuleInit() {
     for (const queueName of this.queueNames) {
-      const providerId = queueName.split('.')[0]
-      const providerJobOptions = this.getJobOptions(providerId)
-      const queue = this.moduleRef.get<Queue>(getQueueToken(queueName), { strict: false })
-      this.queues.set(queueName, queue)
-      const jobs = await queue.getJobs(['active', 'waiting', 'delayed', 'completed', 'failed'])
+      try {
+        const providerId = queueName.split('.')[0]
+        const providerJobOptions = this.getJobOptions(providerId)
+        const queue = this.moduleRef.get<Queue>(getQueueToken(queueName), { strict: false })
+        this.queues.set(queueName, queue)
+        const jobs = await queue.getJobs(['active', 'waiting', 'delayed', 'completed', 'failed'])
 
-      // Repeatable jobs
-      const repeatableJobsInfo = await queue.getRepeatableJobs()
-      for (const jobInfo of repeatableJobsInfo) {
-        const jobRepeat = {
-          repeat: {
-            every: jobInfo.every
+        // Repeatable jobs
+        const repeatableJobsInfo = await queue.getRepeatableJobs()
+        for (const jobInfo of repeatableJobsInfo) {
+          const jobRepeat = {
+            repeat: {
+              every: jobInfo.every
+            }
           }
-        }
-        this.logger.log(
-          `Initializing jobs for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}`
-        )
-
-        if (jobInfo.id !== undefined && providerJobOptions.repeat.every !== jobRepeat.repeat.every) {
-          this.logger.warn(
-            `Job for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}' has different repeat interval than configured: current ${jobRepeat.repeat.every / 1000}s, target: ${providerJobOptions.repeat.every / 1000}s`
+          this.logger.log(
+            `Initializing jobs for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}`
           )
-          const job = jobs.find((j) => j.opts?.repeat?.key === jobInfo.key)
-          if (job !== undefined && job !== null) {
-            await this.updateJobRepeatOptions(queue, job, jobInfo.id, providerJobOptions.repeat)
+
+          if (jobInfo.id !== undefined && providerJobOptions.repeat.every !== jobRepeat.repeat.every) {
+            this.logger.warn(
+              `Job for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}' has different repeat interval than configured: current ${jobRepeat.repeat.every / 1000}s, target: ${providerJobOptions.repeat.every / 1000}s`
+            )
+            const job = jobs.find((j) => j.opts?.repeat?.key === jobInfo.key)
+            if (job !== undefined && job !== null) {
+              await this.updateJobRepeatOptions(queue, job, jobInfo.id, providerJobOptions.repeat)
+            }
           }
         }
+      } catch (err) {
+        const message: string = err instanceof Error ? err.message : String(err)
+        this.logger.warn(`Failed to initialize queue '${queueName}': ${message}`)
       }
     }
   }

@@ -6,7 +6,7 @@ export interface QueuesInfo {
 }
 
 export interface QueueInfo {
-  jobCounts: JobCounts
+  jobCounts: JobCounts | null
 }
 
 export type QueuesJobCount = Record<string, JobCounts>
