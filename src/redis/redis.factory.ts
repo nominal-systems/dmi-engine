@@ -37,6 +37,8 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
     process.env.REDIS_CLUSTER_RETRY_BASE_MS !== undefined ? Number(process.env.REDIS_CLUSTER_RETRY_BASE_MS) : 1000
   const clusterRetryMaxMs =
     process.env.REDIS_CLUSTER_RETRY_MAX_MS !== undefined ? Number(process.env.REDIS_CLUSTER_RETRY_MAX_MS) : 20000
+  const commandTimeoutMs =
+    process.env.REDIS_COMMAND_TIMEOUT_MS !== undefined ? Number(process.env.REDIS_COMMAND_TIMEOUT_MS) : 10000
 
   const baseRedisOptions: RedisOptions = {
     host: redis.host,
@@ -51,7 +53,7 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
   logger.debug(
     `[redis] config host=${redis.host} port=${redis.port} cluster=${redis.isCluster} tls=${tls !== undefined} username=${
       username !== '' ? 'set' : 'unset'
-    } password=${password !== '' ? 'set' : 'unset'}`
+    } password=${password !== '' ? 'set' : 'unset'} commandTimeout=${Number.isNaN(commandTimeoutMs) ? 'unset' : commandTimeoutMs}ms`
   )
 
   const clusterOptions: ClusterOptions = {
@@ -74,6 +76,12 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
         type
       }
 
+      // bclient performs blocking Redis commands (BLPOP) so it must never have a commandTimeout.
+      // client and subscriber use regular commands: apply commandTimeout so that a Redis blip
+      // causes fast failure (and a proper MQTT error reply) instead of hanging indefinitely.
+      const commandTimeout =
+        type !== 'bclient' && !Number.isNaN(commandTimeoutMs) ? { commandTimeout: commandTimeoutMs } : {}
+
       const client = redis.isCluster
         ? new Redis.Cluster(
           [
@@ -82,9 +90,12 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
               port: redis.port
             }
           ],
-          clusterOptions
+          {
+            ...clusterOptions,
+            redisOptions: { ...clusterOptions.redisOptions, ...commandTimeout }
+          }
         )
-        : new Redis(baseRedisOptions)
+        : new Redis({ ...baseRedisOptions, ...commandTimeout })
 
       client.on('error', (error: any) => {
         logger.error(
