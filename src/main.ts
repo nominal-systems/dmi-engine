@@ -8,8 +8,8 @@ import { type AppConfig } from './config/configuration.interface'
 const logger = new Logger('Bootstrap')
 
 const lastUnhandledLog = new Map<string, number>()
-process.on('unhandledRejection', (reason: any) => {
-  const key = reason?.message ?? String(reason)
+process.on('unhandledRejection', (reason: unknown) => {
+  const key = reason instanceof Error ? reason.message : String(reason)
   const now = Date.now()
   const lastLog = lastUnhandledLog.get(key)
   if (lastLog !== undefined && now - lastLog < 30000) {

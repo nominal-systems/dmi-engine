@@ -1,6 +1,7 @@
 import { Test, type TestingModule } from '@nestjs/testing'
 import { ConfigService } from '@nestjs/config'
 import { ModuleRef } from '@nestjs/core'
+import { type ExistingIntegrationPayload, type IPayload, type NewIntegrationPayload } from '@nominal-systems/dmi-engine-common'
 import { QueueManager } from './queue-manager.service'
 
 const mockQueue = {
@@ -78,8 +79,10 @@ describe('QueueManager', () => {
 
     it('should start polling jobs successfully', async () => {
       mockQueue.add.mockResolvedValue({})
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const payload: IPayload<NewIntegrationPayload> = {} as IPayload<NewIntegrationPayload>
 
-      await service.startPollingJobsForIntegration('test-provider', 'integration-1', {} as any)
+      await service.startPollingJobsForIntegration('test-provider', 'integration-1', payload)
 
       expect(mockQueue.add).toHaveBeenCalledWith({}, { repeat: { every: 60000 }, jobId: 'integration-1' })
       expect(service.cacheErrorCount).toBe(0)
@@ -87,9 +90,11 @@ describe('QueueManager', () => {
 
     it('should not throw on Redis failure and increment error count', async () => {
       mockQueue.add.mockRejectedValue(new Error('READONLY'))
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const payload: IPayload<NewIntegrationPayload> = {} as IPayload<NewIntegrationPayload>
 
       await expect(
-        service.startPollingJobsForIntegration('test-provider', 'integration-1', {} as any)
+        service.startPollingJobsForIntegration('test-provider', 'integration-1', payload)
       ).resolves.not.toThrow()
 
       expect(service.cacheErrorCount).toBe(1)
@@ -133,9 +138,11 @@ describe('QueueManager', () => {
     it('should not throw when both stop and start fail', async () => {
       mockQueue.removeRepeatable.mockRejectedValue(new Error('Redis timeout'))
       mockQueue.add.mockRejectedValue(new Error('Redis timeout'))
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const payload: IPayload<ExistingIntegrationPayload> = {} as IPayload<ExistingIntegrationPayload>
 
       await expect(
-        service.updatePollingJobsForIntegration('test-provider', 'integration-1', {} as any)
+        service.updatePollingJobsForIntegration('test-provider', 'integration-1', payload)
       ).resolves.not.toThrow()
 
       expect(service.cacheErrorCount).toBe(2)

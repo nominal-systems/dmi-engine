@@ -1,15 +1,8 @@
-import { Test, type TestingModule } from '@nestjs/testing'
-import {
-  type ClientProxy,
-  ClientsModule,
-  Transport
-} from '@nestjs/microservices'
+import { Test } from '@nestjs/testing'
+import { ClientsModule, Transport } from '@nestjs/microservices'
 import { EngineController } from '../src/engine/engine.controller'
 
 describe('EngineController', () => {
-  let engineController: EngineController
-  let client: ClientProxy
-
   beforeEach(async () => {
     const mockClient = {
       send: jest.fn().mockImplementation(() => ({
@@ -17,7 +10,7 @@ describe('EngineController', () => {
       }))
     }
 
-    const module: TestingModule = await Test.createTestingModule({
+    await Test.createTestingModule({
       imports: [
         ClientsModule.register([
           {
@@ -34,8 +27,5 @@ describe('EngineController', () => {
       .overrideProvider('API_SERVICE')
       .useValue(mockClient)
       .compile()
-
-    engineController = module.get<EngineController>(EngineController)
-    client = module.get<ClientProxy>('API_SERVICE')
   })
 })

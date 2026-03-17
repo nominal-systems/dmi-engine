@@ -166,7 +166,7 @@ export class QueueManager implements OnModuleInit {
     try {
       return await Promise.race([
         queue.getJobCounts(),
-        new Promise<never>((_, reject) => setTimeout(() => { reject(new Error('getJobCounts timed out')) }, 5000))
+        new Promise<never>((_resolve, reject) => setTimeout(() => { reject(new Error('getJobCounts timed out')) }, 5000))
       ])
     } catch (err) {
       this._cacheErrorCount++
