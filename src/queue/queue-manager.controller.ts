@@ -10,21 +10,15 @@ export class QueueManagerController {
 
   @Get()
   async getJobCounts(): Promise<QueuesInfo> {
+    const queueNames = this.queueManager.getQueueNames()
     const queuesInfo: QueuesInfo = {
-      total: 0,
+      total: queueNames.length,
+      cacheErrors: this.queueManager.cacheErrorCount,
       queues: {}
     }
-    const queueNames = this.queueManager.getQueueNames()
-    queuesInfo.total = queueNames.length
     for (const queueName of queueNames) {
-      try {
-        queuesInfo.queues[queueName] = {
-          jobCounts: await this.queueManager.getJobCounts(queueName)
-        }
-      } catch (err) {
-        const message: string = err instanceof Error ? err.message : String(err)
-        this.logger.warn(`Failed to get job counts for queue '${queueName}': ${message}`)
-        queuesInfo.queues[queueName] = { jobCounts: null }
+      queuesInfo.queues[queueName] = {
+        jobCounts: await this.queueManager.getJobCounts(queueName)
       }
     }
 

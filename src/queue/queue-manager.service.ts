@@ -6,11 +6,19 @@ import { ExistingIntegrationPayload, IPayload, NewIntegrationPayload } from '@no
 import { EveryRepeatOptions, Job, JobCounts, Queue } from 'bull'
 import { QueueManagerJobOptions } from './queue-manager.interface'
 
+const ERROR_LOG_INTERVAL_MS = 30000
+
 @Injectable()
 export class QueueManager implements OnModuleInit {
   private readonly logger = new Logger(QueueManager.name)
   private readonly defaultJobOptions: QueueManagerJobOptions = this.configService.getOrThrow('jobs')
   private readonly queues = new Map<string, Queue>()
+  private readonly lastQueueErrorLog = new Map<string, number>()
+  private _cacheErrorCount = 0
+
+  get cacheErrorCount(): number {
+    return this._cacheErrorCount
+  }
 
   constructor(
     private readonly configService: ConfigService,
@@ -26,6 +34,18 @@ export class QueueManager implements OnModuleInit {
         const providerJobOptions = this.getJobOptions(providerId)
         const queue = this.moduleRef.get<Queue>(getQueueToken(queueName), { strict: false })
         this.queues.set(queueName, queue)
+        queue.on('error', (err) => {
+          this._cacheErrorCount++
+          const errorKey = `${queueName}:${(err as any)?.code ?? (err as any)?.message ?? 'unknown'}`
+          const now = Date.now()
+          const lastLog = this.lastQueueErrorLog.get(errorKey)
+          if (lastLog !== undefined && now - lastLog < ERROR_LOG_INTERVAL_MS) {
+            return
+          }
+          this.lastQueueErrorLog.set(errorKey, now)
+          const message: string = err instanceof Error ? err.message : String(err)
+          this.logger.warn(`Queue '${queueName}' error: ${message}`)
+        })
         const jobs = await queue.getJobs(['active', 'waiting', 'delayed', 'completed', 'failed'])
 
         // Repeatable jobs
@@ -51,6 +71,7 @@ export class QueueManager implements OnModuleInit {
           }
         }
       } catch (err) {
+        this._cacheErrorCount++
         const message: string = err instanceof Error ? err.message : String(err)
         this.logger.warn(`Failed to initialize queue '${queueName}': ${message}`)
       }
@@ -88,7 +109,15 @@ export class QueueManager implements OnModuleInit {
     const providerQueues = this.getQueues(provider)
     const providerJobOptions = this.getJobOptions(provider)
     for (const queue of providerQueues) {
-      await this.startRepeatingJob(queue, jobId, providerJobOptions.repeat, data)
+      try {
+        await this.startRepeatingJob(queue, jobId, providerJobOptions.repeat, data)
+      } catch (err) {
+        this._cacheErrorCount++
+        const message: string = err instanceof Error ? err.message : String(err)
+        this.logger.warn(
+          `Redis failure starting polling job '${jobId}' in queue '${queue.name}' (${provider}): ${message}`
+        )
+      }
     }
   }
 
@@ -96,9 +125,17 @@ export class QueueManager implements OnModuleInit {
     this.logger.log(`Stopping polling jobs for integration '${jobId}' (${provider.toUpperCase()})`)
     const providerQueues = this.getQueues(provider)
     for (const queue of providerQueues) {
-      const jobOptions = this.getJobOptions(provider).repeat
-      await this.removeRepeatableJob(queue, jobId, jobOptions)
-      this.logger.debug(`Stopped repeating job '${jobId}' in queue ${queue.name}`)
+      try {
+        const jobOptions = this.getJobOptions(provider).repeat
+        await this.removeRepeatableJob(queue, jobId, jobOptions)
+        this.logger.debug(`Stopped repeating job '${jobId}' in queue ${queue.name}`)
+      } catch (err) {
+        this._cacheErrorCount++
+        const message: string = err instanceof Error ? err.message : String(err)
+        this.logger.warn(
+          `Redis failure stopping polling job '${jobId}' in queue '${queue.name}' (${provider}): ${message}`
+        )
+      }
     }
   }
 
@@ -121,12 +158,21 @@ export class QueueManager implements OnModuleInit {
     await this.startRepeatingJob(queue, jobId, newRepeatOptions, job.data)
   }
 
-  async getJobCounts(queueName: string): Promise<JobCounts> {
+  async getJobCounts(queueName: string): Promise<JobCounts | null> {
     const queue = this.getQueue(queueName)
-    if (queue !== undefined) {
-      return await queue.getJobCounts()
-    } else {
-      throw new Error(`Queue ${queueName} not found`)
+    if (queue === undefined) {
+      return null
+    }
+    try {
+      return await Promise.race([
+        queue.getJobCounts(),
+        new Promise<never>((_, reject) => setTimeout(() => { reject(new Error('getJobCounts timed out')) }, 5000))
+      ])
+    } catch (err) {
+      this._cacheErrorCount++
+      const message: string = err instanceof Error ? err.message : String(err)
+      this.logger.warn(`Redis failure getting job counts for queue '${queueName}': ${message}`)
+      return null
     }
   }
 
