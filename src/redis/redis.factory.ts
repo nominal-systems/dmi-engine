@@ -66,6 +66,9 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
     }
   }
 
+  const ERROR_LOG_INTERVAL_MS = 30000
+  const lastErrorLog = new Map<string, number>()
+
   return {
     createClient: (type = 'client') => {
       const logContext = {
@@ -75,6 +78,7 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
         tls: tls !== undefined,
         type
       }
+      const logPrefix = `[redis] host=${logContext.host} port=${logContext.port} cluster=${logContext.isCluster} tls=${logContext.tls} type=${logContext.type}`
 
       // bclient performs blocking Redis commands (BLPOP) so it must never have a commandTimeout.
       // client and subscriber use regular commands: apply commandTimeout so that a Redis blip
@@ -98,15 +102,17 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
         : new Redis({ ...baseRedisOptions, ...commandTimeout })
 
       client.on('error', (error: any) => {
-        logger.error(
-          `[redis] client error host=${logContext.host} port=${logContext.port} cluster=${logContext.isCluster} tls=${logContext.tls} type=${logContext.type}: ${error?.message ?? error}`,
-          error?.stack
-        )
+        const errorKey = `${type}:${error?.code ?? error?.message ?? 'unknown'}`
+        const now = Date.now()
+        const lastLog = lastErrorLog.get(errorKey)
+        if (lastLog !== undefined && now - lastLog < ERROR_LOG_INTERVAL_MS) {
+          return
+        }
+        lastErrorLog.set(errorKey, now)
+        logger.warn(`${logPrefix} error: ${error?.message ?? error}`)
       })
       client.once('ready', () => {
-        logger.debug(
-          `[redis] connected host=${logContext.host} port=${logContext.port} cluster=${logContext.isCluster} tls=${logContext.tls} type=${logContext.type}`
-        )
+        logger.debug(`${logPrefix} connected`)
       })
 
       return client
