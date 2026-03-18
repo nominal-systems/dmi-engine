@@ -47,6 +47,7 @@ export const createBullRedisOptions = (configService: ConfigService, logger = ne
     ...(tls !== undefined ? { tls } : {}),
     enableReadyCheck: false,
     maxRetriesPerRequest: null,
+    keepAlive: 5000,
     ...(connectTimeoutMs !== undefined && !Number.isNaN(connectTimeoutMs) ? { connectTimeout: connectTimeoutMs } : {})
   }
 
