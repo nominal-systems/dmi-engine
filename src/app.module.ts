@@ -43,7 +43,40 @@ import { statsigFeatureFlagProvider } from './feature-flags/statsig-feature-flag
         disabled: process.env.ANTECH_V6_DISABLED === 'true' || false
       },
       'wisdom-panel': {
-        queues: [{ name: 'wisdom-panel.results' }, { name: 'wisdom-panel.orders' }],
+        queues: [
+          {
+            name: 'wisdom-panel.results',
+            defaultJobOptions: {
+              removeOnComplete: true,
+              removeOnFail: false,
+              attempts: 3,
+              backoff: {
+                type: 'exponential',
+                delay: 5000
+              }
+            },
+            settings: {
+              lockDuration: 120000,
+              maxStalledCount: 2
+            }
+          },
+          {
+            name: 'wisdom-panel.orders',
+            defaultJobOptions: {
+              removeOnComplete: true,
+              removeOnFail: false,
+              attempts: 3,
+              backoff: {
+                type: 'exponential',
+                delay: 5000
+              }
+            },
+            settings: {
+              lockDuration: 120000,
+              maxStalledCount: 2
+            }
+          }
+        ],
         providerModule: WisdomPanelModule.register(),
         disabled: process.env.WISDOM_PANEL_DISABLED === 'true' || false,
         options: {
