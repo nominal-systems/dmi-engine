@@ -54,7 +54,7 @@ export default (): AppConfig => ({
   },
   jobs: {
     repeat: {
-      every: 1000 * 30
+      every: Number(process.env.POLLING_INTERVAL_MS ?? 1000 * 120) // 120 seconds
     }
   }
 })

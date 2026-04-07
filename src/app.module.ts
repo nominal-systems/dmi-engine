@@ -40,7 +40,10 @@ import { statsigFeatureFlagProvider } from './feature-flags/statsig-feature-flag
           imports: [FeatureFlagsModule],
           featureFlagProvider: statsigFeatureFlagProvider
         }),
-        disabled: process.env.ANTECH_V6_DISABLED === 'true' || false
+        disabled: process.env.ANTECH_V6_DISABLED === 'true' || false,
+        ...(process.env.ANTECH_V6_POLLING_INTERVAL_MS != null
+          ? { options: { repeat: { every: Number(process.env.ANTECH_V6_POLLING_INTERVAL_MS) } } }
+          : {})
       },
       'wisdom-panel': {
         queues: [{ name: 'wisdom-panel.results' }, { name: 'wisdom-panel.orders' }],
@@ -48,7 +51,7 @@ import { statsigFeatureFlagProvider } from './feature-flags/statsig-feature-flag
         disabled: process.env.WISDOM_PANEL_DISABLED === 'true' || false,
         options: {
           repeat: {
-            every: 1000 * 60 * 10
+            every: Number(process.env.WISDOM_PANEL_POLLING_INTERVAL_MS ?? 1000 * 60 * 10) // 10 minutes
           }
         }
       }
