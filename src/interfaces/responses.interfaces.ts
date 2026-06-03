@@ -2,6 +2,7 @@ import { JobCounts } from 'bull'
 
 export interface QueuesInfo {
   total: number
+  cacheErrors: number
   queues: Record<string, QueueInfo>
 }
 
