@@ -5,10 +5,13 @@ import {
   type INewIntegrationJobMetadata,
   Operation,
   type ProviderIntegrationAdmin,
-  Resource
+  Resource,
+  SharedMessagePattern
 } from '@nominal-systems/dmi-engine-common'
-import { Ctx, MessagePattern, type MqttContext, Payload, RpcException } from '@nestjs/microservices'
+import { Ctx, type MqttContext, Payload, RpcException } from '@nestjs/microservices'
 import { QueueManager } from '../queue/queue-manager.service'
+
+const SHARED_SUBSCRIPTION_GROUP = 'dmi-engine'
 
 @Controller('engine')
 @UsePipes(
@@ -23,7 +26,7 @@ export class EngineController implements ProviderIntegrationAdmin {
   constructor(private readonly queueManager: QueueManager) {}
 
   // TODO(gb): use a wildcard to match all providers
-  @MessagePattern(`wisdom-panel/${Resource.Integration}/${Operation.Create}`)
+  @SharedMessagePattern(SHARED_SUBSCRIPTION_GROUP, `wisdom-panel/${Resource.Integration}/${Operation.Create}`)
   async handleNewIntegration(
     @Payload() jobData: INewIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
@@ -39,7 +42,7 @@ export class EngineController implements ProviderIntegrationAdmin {
   }
 
   // TODO(gb): use a wildcard to match all providers
-  @MessagePattern(`wisdom-panel/${Resource.Integration}/${Operation.Remove}`)
+  @SharedMessagePattern(SHARED_SUBSCRIPTION_GROUP, `wisdom-panel/${Resource.Integration}/${Operation.Remove}`)
   async handleIntegrationDelete(
     @Payload() jobData: IExistingIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
@@ -55,7 +58,7 @@ export class EngineController implements ProviderIntegrationAdmin {
   }
 
   // TODO(gb): use a wildcard to match all providers
-  @MessagePattern(`wisdom-panel/${Resource.Integration}/${Operation.Update}`)
+  @SharedMessagePattern(SHARED_SUBSCRIPTION_GROUP, `wisdom-panel/${Resource.Integration}/${Operation.Update}`)
   async handleIntegrationUpdate(
     @Payload() jobData: IExistingIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
@@ -75,7 +78,7 @@ export class EngineController implements ProviderIntegrationAdmin {
   }
 
   // TODO(gb): remove this method once the wildcard is implemented
-  @MessagePattern(`antech-v6/${Resource.Integration}/${Operation.Create}`)
+  @SharedMessagePattern(SHARED_SUBSCRIPTION_GROUP, `antech-v6/${Resource.Integration}/${Operation.Create}`)
   async handleNewIntegrationAntechV6(
     @Payload() jobData: INewIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
@@ -84,7 +87,7 @@ export class EngineController implements ProviderIntegrationAdmin {
   }
 
   // TODO(gb): remove this method once the wildcard is implemented
-  @MessagePattern(`antech-v6/${Resource.Integration}/${Operation.Remove}`)
+  @SharedMessagePattern(SHARED_SUBSCRIPTION_GROUP, `antech-v6/${Resource.Integration}/${Operation.Remove}`)
   async handleIntegrationDeleteAntechV6(
     @Payload() jobData: IExistingIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
@@ -92,7 +95,7 @@ export class EngineController implements ProviderIntegrationAdmin {
     await this.handleIntegrationDelete(jobData, context)
   }
 
-  @MessagePattern(`antech-v6/${Resource.Integration}/${Operation.Update}`)
+  @SharedMessagePattern(SHARED_SUBSCRIPTION_GROUP, `antech-v6/${Resource.Integration}/${Operation.Update}`)
   async handleIntegrationUpdateAntechV6(
     @Payload() jobData: IExistingIntegrationJobMetadata<IMetadata>,
     @Ctx() context: MqttContext
