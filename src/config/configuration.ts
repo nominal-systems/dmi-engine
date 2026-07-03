@@ -1,4 +1,11 @@
-import { type AppConfig } from './configuration.interface'
+import { type AppConfig, type EngineRole } from './configuration.interface'
+
+const parseEngineRole = (value?: string): EngineRole => {
+  if (value === 'api' || value === 'worker') {
+    return value
+  }
+  return 'all'
+}
 
 const parseStatsigOverrides = (value?: string): Record<string, boolean> => {
   if (value === undefined || value.trim() === '') {
@@ -23,6 +30,7 @@ const parseStatsigOverrides = (value?: string): Record<string, boolean> => {
 
 export default (): AppConfig => ({
   port: Number(process.env.PORT ?? 3000),
+  role: parseEngineRole(process.env.ENGINE_ROLE),
   mqtt: {
     protocol: process.env.MQTT_PROTOCOL ?? 'mqtt',
     hostname: process.env.MQTT_HOST ?? 'localhost',
