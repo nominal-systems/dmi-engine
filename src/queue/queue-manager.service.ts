@@ -2,10 +2,9 @@ import { getQueueToken } from '@nestjs/bull'
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ModuleRef } from '@nestjs/core'
-import { ExistingIntegrationPayload, IPayload, NewIntegrationPayload } from '@nominal-systems/dmi-engine-common'
+import { ExistingIntegrationPayload, IPayload, NewIntegrationPayload, EngineRole, roleProcessesJobs } from '@nominal-systems/dmi-engine-common'
 import { EveryRepeatOptions, Job, JobCounts, Queue } from 'bull'
 import { QueueManagerJobOptions } from './queue-manager.interface'
-import { EngineRole } from '../config/configuration.interface'
 
 @Injectable()
 export class QueueManager implements OnModuleInit {
@@ -31,7 +30,7 @@ export class QueueManager implements OnModuleInit {
 
         // Api pods never process jobs: pause the local worker only, leaving
         // the queue itself running so worker pods keep consuming.
-        if (this.role === 'api') {
+        if (!roleProcessesJobs(this.role)) {
           await queue.pause(true)
           this.logger.log(`Queue '${queueName}' paused locally (role 'api' does not process jobs)`)
         }

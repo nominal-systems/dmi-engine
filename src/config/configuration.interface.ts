@@ -1,7 +1,6 @@
 import { type EveryRepeatOptions } from 'bull'
 import { type RedisOptions } from 'ioredis'
-
-export type EngineRole = 'all' | 'api' | 'worker'
+import { type EngineRole } from '@nominal-systems/dmi-engine-common'
 
 export interface AppConfig {
   port: number

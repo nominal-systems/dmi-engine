@@ -3,7 +3,8 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { type MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { ConfigService } from '@nestjs/config'
-import { type AppConfig, type EngineRole } from './config/configuration.interface'
+import { type EngineRole, roleServesMqtt } from '@nominal-systems/dmi-engine-common'
+import { type AppConfig } from './config/configuration.interface'
 
 async function bootstrap () {
   const app = await NestFactory.create(AppModule)
@@ -14,7 +15,7 @@ async function bootstrap () {
 
   // Worker pods only process queue jobs: they never attach MQTT message
   // handlers, so request/reply traffic is served exclusively by api pods.
-  if (role !== 'worker') {
+  if (roleServesMqtt(role)) {
     app.connectMicroservice<MicroserviceOptions>(
       {
         transport: Transport.MQTT,

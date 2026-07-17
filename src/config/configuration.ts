@@ -1,11 +1,5 @@
-import { type AppConfig, type EngineRole } from './configuration.interface'
-
-const parseEngineRole = (value?: string): EngineRole => {
-  if (value === 'api' || value === 'worker') {
-    return value
-  }
-  return 'all'
-}
+import { parseEngineRole } from '@nominal-systems/dmi-engine-common'
+import { type AppConfig } from './configuration.interface'
 
 const parseStatsigOverrides = (value?: string): Record<string, boolean> => {
   if (value === undefined || value.trim() === '') {
@@ -30,7 +24,7 @@ const parseStatsigOverrides = (value?: string): Record<string, boolean> => {
 
 export default (): AppConfig => ({
   port: Number(process.env.PORT ?? 3000),
-  role: parseEngineRole(process.env.ENGINE_ROLE),
+  role: parseEngineRole(),
   mqtt: {
     protocol: process.env.MQTT_PROTOCOL ?? 'mqtt',
     hostname: process.env.MQTT_HOST ?? 'localhost',
