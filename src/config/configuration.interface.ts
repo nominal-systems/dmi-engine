@@ -1,8 +1,10 @@
 import { type EveryRepeatOptions } from 'bull'
 import { type RedisOptions } from 'ioredis'
+import { type EngineRole } from '@nominal-systems/dmi-engine-common'
 
 export interface AppConfig {
   port: number
+  role: EngineRole
   mqtt: MQTTConfig
   redis: RedisOptions & { isCluster: boolean }
   statsig: StatsigConfig

@@ -2,7 +2,7 @@ import { getQueueToken } from '@nestjs/bull'
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ModuleRef } from '@nestjs/core'
-import { ExistingIntegrationPayload, IPayload, NewIntegrationPayload } from '@nominal-systems/dmi-engine-common'
+import { ExistingIntegrationPayload, IPayload, NewIntegrationPayload, EngineRole, roleProcessesJobs } from '@nominal-systems/dmi-engine-common'
 import { EveryRepeatOptions, Job, JobCounts, Queue } from 'bull'
 import { QueueManagerJobOptions } from './queue-manager.interface'
 
@@ -10,6 +10,7 @@ import { QueueManagerJobOptions } from './queue-manager.interface'
 export class QueueManager implements OnModuleInit {
   private readonly logger = new Logger(QueueManager.name)
   private readonly defaultJobOptions: QueueManagerJobOptions = this.configService.getOrThrow('jobs')
+  private readonly role: EngineRole = this.configService.get('role', 'all')
   private readonly queues = new Map<string, Queue>()
 
   constructor(
@@ -26,6 +27,14 @@ export class QueueManager implements OnModuleInit {
         const providerJobOptions = this.getJobOptions(providerId)
         const queue = this.moduleRef.get<Queue>(getQueueToken(queueName), { strict: false })
         this.queues.set(queueName, queue)
+
+        // Api pods never process jobs: pause the local worker only, leaving
+        // the queue itself running so worker pods keep consuming.
+        if (!roleProcessesJobs(this.role)) {
+          await queue.pause(true)
+          this.logger.log(`Queue '${queueName}' paused locally (role 'api' does not process jobs)`)
+        }
+
         const jobs = await queue.getJobs(['active', 'waiting', 'delayed', 'completed', 'failed'])
 
         // Repeatable jobs
