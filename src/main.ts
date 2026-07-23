@@ -33,5 +33,7 @@ async function bootstrap () {
   await app.listen(PORT)
 }
 
-/* eslint-disable @typescript-eslint/no-floating-promises */
-bootstrap()
+bootstrap().catch((err) => {
+  Logger.error(err instanceof Error ? err.message : String(err), 'Bootstrap')
+  process.exit(1)
+})
