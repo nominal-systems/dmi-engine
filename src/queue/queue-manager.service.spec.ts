@@ -2,6 +2,7 @@ import { getQueueToken } from '@nestjs/bull'
 import { ConfigService } from '@nestjs/config'
 import { ModuleRef } from '@nestjs/core'
 import { Test, type TestingModule } from '@nestjs/testing'
+import { type EngineRole } from '@nominal-systems/dmi-engine-common'
 import { QueueManager } from './queue-manager.service'
 
 const QUEUE_NAMES = ['antech-v6.orders', 'antech-v6.results']
@@ -14,6 +15,7 @@ function reachableQueue(overrides: Record<string, unknown> = {}): any {
     getRepeatableJobs: jest.fn().mockResolvedValue([]),
     removeRepeatable: jest.fn().mockResolvedValue(undefined),
     add: jest.fn().mockResolvedValue(undefined),
+    pause: jest.fn().mockResolvedValue(undefined),
     ...overrides
   }
 }
@@ -24,7 +26,7 @@ function unreachableQueue(message: string): any {
   })
 }
 
-async function buildQueueManager(queues: Record<string, any>): Promise<QueueManager> {
+async function buildQueueManager(queues: Record<string, any>, role: EngineRole = 'all'): Promise<QueueManager> {
   const module: TestingModule = await Test.createTestingModule({
     providers: [
       QueueManager,
@@ -32,7 +34,10 @@ async function buildQueueManager(queues: Record<string, any>): Promise<QueueMana
       { provide: 'JOB_OPTIONS', useValue: {} },
       {
         provide: ConfigService,
-        useValue: { getOrThrow: jest.fn().mockReturnValue(DEFAULT_JOB_OPTIONS) }
+        useValue: {
+          getOrThrow: jest.fn().mockReturnValue(DEFAULT_JOB_OPTIONS),
+          get: jest.fn().mockReturnValue(role)
+        }
       },
       {
         provide: ModuleRef,
@@ -76,6 +81,34 @@ describe('QueueManager', () => {
       await expect(queueManager.onModuleInit()).rejects.toThrow(/2 of 2 queues/)
       await expect(queueManager.onModuleInit()).rejects.toThrow(/antech-v6\.orders/)
       await expect(queueManager.onModuleInit()).rejects.toThrow(/antech-v6\.results/)
+    })
+
+    it('pauses queues locally for the api role, and still fails when one is unreachable', async () => {
+      const paused = reachableQueue()
+      const queueManager = await buildQueueManager(
+        {
+          [getQueueToken(QUEUE_NAMES[0])]: paused,
+          [getQueueToken(QUEUE_NAMES[1])]: reachableQueue()
+        },
+        'api'
+      )
+
+      await expect(queueManager.onModuleInit()).resolves.toBeUndefined()
+      expect(paused.pause).toHaveBeenCalledWith(true)
+    })
+
+    it('treats a failed local pause as a queue initialization failure', async () => {
+      const queueManager = await buildQueueManager(
+        {
+          [getQueueToken(QUEUE_NAMES[0])]: reachableQueue({
+            pause: jest.fn().mockRejectedValue(new Error('Connection is closed'))
+          }),
+          [getQueueToken(QUEUE_NAMES[1])]: reachableQueue()
+        },
+        'api'
+      )
+
+      await expect(queueManager.onModuleInit()).rejects.toThrow(/Refusing to start: 1 of 2 queues/)
     })
 
     it('refuses to start when a queue never responds', async () => {

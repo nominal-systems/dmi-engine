@@ -1,3 +1,4 @@
+import { parseEngineRole } from '@nominal-systems/dmi-engine-common'
 import { type AppConfig } from './configuration.interface'
 
 const parseStatsigOverrides = (value?: string): Record<string, boolean> => {
@@ -23,6 +24,7 @@ const parseStatsigOverrides = (value?: string): Record<string, boolean> => {
 
 export default (): AppConfig => ({
   port: Number(process.env.PORT ?? 3000),
+  role: parseEngineRole(),
   mqtt: {
     protocol: process.env.MQTT_PROTOCOL ?? 'mqtt',
     hostname: process.env.MQTT_HOST ?? 'localhost',
