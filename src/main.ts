@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core'
+import { Logger } from '@nestjs/common'
 import { AppModule } from './app.module'
 import { type MicroserviceOptions, Transport } from '@nestjs/microservices'
 import { ConfigService } from '@nestjs/config'
@@ -24,5 +25,7 @@ async function bootstrap () {
   await app.listen(PORT)
 }
 
-/* eslint-disable @typescript-eslint/no-floating-promises */
-bootstrap()
+bootstrap().catch((err) => {
+  Logger.error(err instanceof Error ? err.message : String(err), 'Bootstrap')
+  process.exit(1)
+})

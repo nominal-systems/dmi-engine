@@ -6,6 +6,11 @@ import { ExistingIntegrationPayload, IPayload, NewIntegrationPayload } from '@no
 import { EveryRepeatOptions, Job, JobCounts, Queue } from 'bull'
 import { QueueManagerJobOptions } from './queue-manager.interface'
 
+// In non-cluster mode ioredis buffers commands and retries DNS forever, so a
+// bad Redis host hangs startup instead of rejecting. Bound it so the failure is
+// always reached rather than waited on.
+const QUEUE_INIT_TIMEOUT_MS = 30000
+
 @Injectable()
 export class QueueManager implements OnModuleInit {
   private readonly logger = new Logger(QueueManager.name)
@@ -20,39 +25,82 @@ export class QueueManager implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    const failures: string[] = []
+
     for (const queueName of this.queueNames) {
       try {
-        const providerId = queueName.split('.')[0]
-        const providerJobOptions = this.getJobOptions(providerId)
-        const queue = this.moduleRef.get<Queue>(getQueueToken(queueName), { strict: false })
-        this.queues.set(queueName, queue)
-        const jobs = await queue.getJobs(['active', 'waiting', 'delayed', 'completed', 'failed'])
-
-        // Repeatable jobs
-        const repeatableJobsInfo = await queue.getRepeatableJobs()
-        for (const jobInfo of repeatableJobsInfo) {
-          const jobRepeat = {
-            repeat: {
-              every: jobInfo.every
-            }
-          }
-          this.logger.log(
-            `Initializing jobs for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}`
-          )
-
-          if (jobInfo.id !== undefined && providerJobOptions.repeat.every !== jobRepeat.repeat.every) {
-            this.logger.warn(
-              `Job for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}' has different repeat interval than configured: current ${jobRepeat.repeat.every / 1000}s, target: ${providerJobOptions.repeat.every / 1000}s`
-            )
-            const job = jobs.find((j) => j.opts?.repeat?.key === jobInfo.key)
-            if (job !== undefined && job !== null) {
-              await this.updateJobRepeatOptions(queue, job, jobInfo.id, providerJobOptions.repeat)
-            }
-          }
-        }
+        await this.withInitTimeout(this.initializeQueue(queueName))
       } catch (err) {
         const message: string = err instanceof Error ? err.message : String(err)
-        this.logger.warn(`Failed to initialize queue '${queueName}': ${message}`)
+        this.logger.error(`Failed to initialize queue '${queueName}': ${message}`)
+        failures.push(`${queueName} (${message})`)
+      }
+    }
+
+    // A queue we could not reach will never receive its repeatable jobs, so the
+    // provider silently stops being polled. Abort startup instead: the pod
+    // crash-loops, which is visible to Kubernetes and to the CrashLoopBackOff alert.
+    if (failures.length > 0) {
+      throw new Error(
+        `Refusing to start: ${failures.length} of ${this.queueNames.length} queues failed to initialize, ` +
+          `polling jobs would never run. Failed queues: ${failures.join(', ')}`
+      )
+    }
+  }
+
+  private async withInitTimeout<T>(work: Promise<T>): Promise<T> {
+    let timer: NodeJS.Timeout | undefined
+    const expiry = new Promise<never>((_resolve, reject) => {
+      timer = setTimeout(() => {
+        reject(new Error(`timed out after ${QUEUE_INIT_TIMEOUT_MS}ms, Redis is likely unreachable`))
+      }, QUEUE_INIT_TIMEOUT_MS)
+    })
+
+    try {
+      return await Promise.race([work, expiry])
+    } finally {
+      if (timer !== undefined) {
+        clearTimeout(timer)
+      }
+    }
+  }
+
+  private async initializeQueue(queueName: string): Promise<void> {
+    const providerId = queueName.split('.')[0]
+    const providerJobOptions = this.getJobOptions(providerId)
+    const queue = this.moduleRef.get<Queue>(getQueueToken(queueName), { strict: false })
+    this.queues.set(queueName, queue)
+    const jobs = await queue.getJobs(['active', 'waiting', 'delayed', 'completed', 'failed'])
+
+    // Repeatable jobs
+    const repeatableJobsInfo = await queue.getRepeatableJobs()
+    for (const jobInfo of repeatableJobsInfo) {
+      const jobRepeat = {
+        repeat: {
+          every: jobInfo.every
+        }
+      }
+      this.logger.log(
+        `Initializing jobs for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}`
+      )
+
+      if (jobInfo.id !== undefined && providerJobOptions.repeat.every !== jobRepeat.repeat.every) {
+        this.logger.warn(
+          `Job for integration '${jobInfo.id}' (${providerId.toUpperCase()}) in queue '${queueName}' has different repeat interval than configured: current ${jobRepeat.repeat.every / 1000}s, target: ${providerJobOptions.repeat.every / 1000}s`
+        )
+        const job = jobs.find((j) => j.opts?.repeat?.key === jobInfo.key)
+        if (job !== undefined && job !== null) {
+          // Reconciling one job's interval is best-effort: the queue is reachable,
+          // so a failure here does not stop this provider from being polled.
+          try {
+            await this.updateJobRepeatOptions(queue, job, jobInfo.id, providerJobOptions.repeat)
+          } catch (err) {
+            const message: string = err instanceof Error ? err.message : String(err)
+            this.logger.warn(
+              `Failed to update repeat interval for integration '${jobInfo.id}' in queue '${queueName}': ${message}`
+            )
+          }
+        }
       }
     }
   }
