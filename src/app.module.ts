@@ -41,9 +41,11 @@ import { statsigFeatureFlagProvider } from './feature-flags/statsig-feature-flag
           featureFlagProvider: statsigFeatureFlagProvider
         }),
         disabled: process.env.ANTECH_V6_DISABLED === 'true' || false,
-        ...(process.env.ANTECH_V6_POLLING_INTERVAL_MS != null
-          ? { options: { repeat: { every: Number(process.env.ANTECH_V6_POLLING_INTERVAL_MS) } } }
-          : {})
+        options: {
+          repeat: {
+            every: Number(process.env.ANTECH_V6_POLLING_INTERVAL_MS ?? 1000 * 60) // 60 seconds
+          }
+        }
       },
       'wisdom-panel': {
         queues: [
