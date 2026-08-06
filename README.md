@@ -82,6 +82,26 @@ The engine can connect to a single Redis instance or a Redis Cluster. Configure 
 
 Bull queue keys are hash-tagged (`{queueName}`) so they stay in a single slot when using Redis Cluster.
 
+## Polling intervals
+
+Each provider integration polls its external API through a Bull repeatable job. The interval is configured per
+provider via environment variables, all expressed in milliseconds:
+
+- `ANTECH_V6_POLLING_INTERVAL_MS` — Antech V6 polling interval. Default: `60000` (60 seconds).
+- `WISDOM_PANEL_POLLING_INTERVAL_MS` — Wisdom Panel polling interval. Default: `600000` (10 minutes).
+- `POLLING_INTERVAL_MS` — fallback interval for providers that do not declare their own `options.repeat`.
+  Default: `120000` (120 seconds).
+
+The Antech V6 default is `60000` because the interval also drives how quickly an order's status transitions in
+the PIMS after placement — at 60 seconds the lab icon turns green within an acceptable window for the clinic.
+This was the operating point agreed during the 2026-07-10 incident review, and it is baked into the code so it
+survives deploys regardless of the environment configuration.
+
+Changing the interval takes effect on the next restart: on boot, `QueueManager` compares the `every` value of
+each repeatable job already registered in Redis against the configured one and, when they differ, logs a
+warning (`has different repeat interval than configured: current Xs, target: Ys`) and reschedules the job. That
+log line is also the simplest way to verify the effective cadence of a running pod.
+
 ## Statsig (Feature Flags)
 
 The engine uses [Statsig](https://statsig.com/) for feature flag management. Configure via environment variables:
