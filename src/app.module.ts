@@ -82,7 +82,10 @@ import { statsigFeatureFlagProvider } from './feature-flags/statsig-feature-flag
             }
           }
         ],
-        providerModule: WisdomPanelModule.register(),
+        providerModule: WisdomPanelModule.register({
+          imports: [FeatureFlagsModule],
+          featureFlagProvider: statsigFeatureFlagProvider
+        }),
         disabled: process.env.WISDOM_PANEL_DISABLED === 'true' || false,
         options: {
           repeat: {
