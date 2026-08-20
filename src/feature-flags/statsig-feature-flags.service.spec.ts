@@ -71,4 +71,51 @@ describe('StatsigFeatureFlagsService', () => {
     })
     expect(statsigMock.checkGateSync).toHaveBeenCalled()
   })
+
+  it('promotes clinicId and integrationId into the Statsig user custom fields', async () => {
+    statsigMock.initialize.mockResolvedValue(undefined)
+    statsigMock.checkGateSync.mockReturnValue(true)
+
+    const configService = createConfigService({
+      enabled: true,
+      serverSecretKey: 'secret-key',
+      environment: 'test',
+      overrides: {},
+      heartbeatIntervalMs: 0,
+      heartbeatGate: 'antech_v6_statsig_test_log',
+      heartbeatEventName: 'statsig_heartbeat'
+    })
+    const service = new StatsigFeatureFlagsService(configService)
+
+    await service.onModuleInit()
+    service.isEnabled('a_gate', { clinicId: '5180', integrationId: 'integration-1' })
+
+    expect(statsigMock.checkGateSync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        custom: expect.objectContaining({ clinicId: '5180', integrationId: 'integration-1' })
+      }),
+      'a_gate'
+    )
+  })
+
+  it('keeps custom undefined when the context carries no segmentation fields', async () => {
+    statsigMock.initialize.mockResolvedValue(undefined)
+    statsigMock.checkGateSync.mockReturnValue(true)
+
+    const configService = createConfigService({
+      enabled: true,
+      serverSecretKey: 'secret-key',
+      environment: 'test',
+      overrides: {},
+      heartbeatIntervalMs: 0,
+      heartbeatGate: 'antech_v6_statsig_test_log',
+      heartbeatEventName: 'statsig_heartbeat'
+    })
+    const service = new StatsigFeatureFlagsService(configService)
+
+    await service.onModuleInit()
+    service.isEnabled('a_gate')
+
+    expect(statsigMock.checkGateSync).toHaveBeenCalledWith({ userID: 'dmi-engine', custom: undefined }, 'a_gate')
+  })
 })
