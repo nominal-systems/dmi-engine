@@ -90,9 +90,14 @@ export class StatsigFeatureFlagsService implements FeatureFlagProvider, OnModule
       return false
     }
 
+    // Promote the top-level context fields into `custom`; Statsig rules can only segment on those.
     const user: StatsigUser = {
       userID: context?.userID ?? 'dmi-engine',
-      custom: toStatsigCustom(context?.custom)
+      custom: toStatsigCustom({
+        ...context?.custom,
+        ...(context?.clinicId !== undefined && { clinicId: context.clinicId }),
+        ...(context?.integrationId !== undefined && { integrationId: context.integrationId })
+      })
     }
 
     try {
